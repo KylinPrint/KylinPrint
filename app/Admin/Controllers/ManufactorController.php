@@ -26,9 +26,11 @@ class ManufactorController extends AdminController
     {
         $grid = new Grid(new Manufactor());
 
-        $grid->column('id', __('Id'));
+        $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Manufactor name'));
         $grid->column('isconnected', __('Isconnected'));
+
+        $grid->column('brands', __('Brands Count'))->display(function ($brands) { return count($brands); });
 
         return $grid;
     }

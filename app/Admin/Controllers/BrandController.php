@@ -26,12 +26,12 @@ class BrandController extends AdminController
     {
         $grid = new Grid(new Brand());
 
-        $grid->column('id', __('Id'));
-        $grid->column('name', __('Name'));
-        $grid->column('name_en', __('Name en'));
-        $grid->column('manufactors_id', __('Manufactor id'));
+        $grid->column('id', __('ID'))->hide();
+        $grid->column('name', __('Brand Name'));
+        $grid->column('name_en', __('Brand Name en'));
+        $grid->column('manufactors.name', __('Manufactor'));
 
-        $grid->column('printers', 'Printers')->display(function ($printers) { return count($printers); });
+        $grid->column('printers', __('Printers Count'))->display(function ($printers) { return count($printers); });
 
         return $grid;
     }

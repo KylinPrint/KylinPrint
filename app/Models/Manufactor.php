@@ -16,7 +16,7 @@ class Manufactor extends Model
 
     public function brands()
     {
-        return $this->hasMany(Brand::class);
+        return $this->hasMany(Brand::class, 'manufactors_id');
     }
 
     public function printers()

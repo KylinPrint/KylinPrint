@@ -3,6 +3,8 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Printer;
+use App\Models\Brand;
+use App\Models\Manufactor;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -32,7 +34,7 @@ class PrinterController extends AdminController
         $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
         $grid->column('model', __('Model'))->sortable();
         $grid->column('manufactors.name', __('Manufactor'))->hide();
-        $grid->column('type', 'Type')->display(function ($printerType) {
+        $grid->column('type', __('Printer Type'))->display(function ($printerType) {
             return $printerType ? '黑白' : '彩色';
         });
         $grid->column('release_date', __('Release date'))->default(date('YY-mm-dd'));
@@ -61,10 +63,10 @@ class PrinterController extends AdminController
         $show = new Show(Printer::findOrFail($id));
 
         $show->field('id', __('ID'));
-        $show->field('brands_id', __('Brand id'));
+        $show->field('brands.name', __('Brand'));
         $show->field('model', __('Model'));
-        $show->field('manufactors_id', __('Manufactor id'));
-        $show->field('type', __('Type'));
+        $show->field('manufactors.name', __('Manufactor'));
+        $show->field('type', __('Printer Type'));
         $show->field('release_date', __('Release date'));
         $show->field('onsale', __('Onsale'));
         $show->field('network', __('Network'));
@@ -83,15 +85,28 @@ class PrinterController extends AdminController
     {
         $form = new Form(new Printer());
 
-        $form->number('brands_id', __('Brand id'));
+        $states = [
+            'on'  => ['value' => 1, 'text' => '是', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => '否', 'color' => 'danger'],
+        ];
+
+        $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
         $form->text('model', __('Model'));
-        $form->number('manufactors_id', __('Manufactor id'));
-        $form->text('type', __('Type'));
+        $form->select('manufactors_id', __('Manufactors'))->options(Manufactor::all()->pluck('name', 'id'));
+        $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
         $form->date('release_date', __('Release date'))->default(date('YY-mm-dd'));
-        $form->number('onsale', __('Onsale'));
-        $form->number('network', __('Network'));
-        $form->text('duplex', __('Duplex'));
+        $form->switch('onsale', __('Onsale'))->states($states);
+        $form->switch('network', __('Network'))->states($states);
+        $form->select('duplex', __('Duplex'))->options([
+            'single' => __('Single'),
+            'manual' => __('Manual Duplex'),
+            'duplex' => __('Auto Duplex')
+        ]);
         $form->text('pagesize', __('Pagesize'));
+
+        $form->confirm('确定更新吗？', 'edit');
+        $form->confirm('确定创建吗？', 'create');
+        $form->confirm('确定提交吗？');
 
         return $form;
     }

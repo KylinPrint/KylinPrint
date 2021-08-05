@@ -23,6 +23,6 @@ class Brand extends Model
 
     public function printers()
     {
-        return $this->hasMany(Printer::class);
+        return $this->hasMany(Printer::class, 'brands_id');
     }
 }

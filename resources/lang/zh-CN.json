@@ -1,12 +1,26 @@
 {
     "Model": "型号",
     "Brand": "品牌",
+    "Brands": "品牌",
+    "Brand Name": "品牌名称",
+    "Brand Name en": "品牌英文名称",
     "Manufactor": "厂商",
+    "Manufactors": "厂商",
+    "Manufactor name": "厂商名称",
     "Release date": "发售日期",
     "Onsale": "在售",
     "Network Print": "网络打印",
-    "Duplex": "双面",
+    "Single": "单面打印",
+    "Duplex": "双面打印",
+    "Manual Duplex": "手动双面打印",
+    "Auto Duplex": "自动双面打印",
     "Pagesize": "最大支持幅面",
     "Printers": "打印机",
-    "Dashboard": "仪表盘"
+    "Dashboard": "仪表盘",  
+    "Printers Count": "打印机数",
+    "Brands Count": "品牌数",
+    "Isconnected": "是否建联",
+    "Solution": "解决方案",
+    "Files": "文件",
+    "Printer Type": "产品类型"
 }
