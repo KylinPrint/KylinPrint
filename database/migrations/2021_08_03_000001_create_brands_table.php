@@ -17,7 +17,7 @@ class CreateBrandsTable extends Migration
             $table->id();                           //品牌ID
             $table->string('name')->unique();       //品牌中文名
             $table->string('name_en')->unique();    //品牌英文名
-            $table->foreignId('manufactors_id')->nullable()
+            $table->foreignId('manufactor_id')->nullable()
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');              //厂商ID

@@ -12,9 +12,9 @@ class Printer extends Model
     protected $table = 'printers';
 
     protected $fillable = [
-        'brand_id',
+        'brands_id',
         'model',
-        'manufactor',
+        'manufactors_id',
         'type',
         'release_date',
         'onsale',

@@ -10,12 +10,10 @@ class Brand extends Model
 {
     use HasFactory;
 
-    protected $table = 'brands';
-
     protected $fillable = [
         'name',
         'name_en',
-        'manufactor'
+        'manufactors_id'
     ];
 
     public function manufactors()

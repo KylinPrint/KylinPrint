@@ -11,8 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => 'Laravel-admin',
-
+    'name' => env('APP_NAME', 'Laravel-admin'),
     /*
     |--------------------------------------------------------------------------
     | Laravel-admin logo
@@ -85,7 +84,7 @@ return [
     | Html title for all pages.
     |
     */
-    'title' => 'Admin',
+    'title' => env('APP_NAME', 'Admin'),
 
     /*
     |--------------------------------------------------------------------------

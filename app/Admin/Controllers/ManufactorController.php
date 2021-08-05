@@ -27,7 +27,7 @@ class ManufactorController extends AdminController
         $grid = new Grid(new Manufactor());
 
         $grid->column('id', __('Id'));
-        $grid->column('manufactor_name', __('Manufactor name'));
+        $grid->column('name', __('Manufactor name'));
         $grid->column('isconnected', __('Isconnected'));
 
         return $grid;
@@ -44,7 +44,7 @@ class ManufactorController extends AdminController
         $show = new Show(Manufactor::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('manufactor_name', __('Manufactor name'));
+        $show->field('name', __('Manufactor name'));
         $show->field('isconnected', __('Isconnected'));
 
         return $show;
@@ -59,7 +59,7 @@ class ManufactorController extends AdminController
     {
         $form = new Form(new Manufactor());
 
-        $form->text('manufactor_name', __('Manufactor name'));
+        $form->text('name', __('Manufactor name'));
         $form->number('isconnected', __('Isconnected'));
 
         return $form;

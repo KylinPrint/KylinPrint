@@ -9,8 +9,6 @@ class Manufactor extends Model
 {
     use HasFactory;
 
-    protected $table = 'manufactors';
-
     protected $fillable = [
         'name',
         'isconnected'

@@ -15,12 +15,12 @@ class CreatePrintersTable extends Migration
     {
         Schema::create('printers', function (Blueprint $table) {
             $table->id();                                           //ID
-            $table->foreignId('brands_id')
+            $table->foreignId('brand_id')
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');                              //品牌ID
             $table->string('model')->unique();                      //型号
-            $table->foreignId('manufactors_id')
+            $table->foreignId('manufactor_id')
                 ->nullable()
                 ->constrained()
                 ->onUpdate('cascade')

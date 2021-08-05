@@ -61,9 +61,9 @@ class PrinterController extends AdminController
         $show = new Show(Printer::findOrFail($id));
 
         $show->field('id', __('ID'));
-        $show->field('brand_id', __('Brand id'));
+        $show->field('brands_id', __('Brand id'));
         $show->field('model', __('Model'));
-        $show->field('manufactor_id', __('Manufactor id'));
+        $show->field('manufactors_id', __('Manufactor id'));
         $show->field('type', __('Type'));
         $show->field('release_date', __('Release date'));
         $show->field('onsale', __('Onsale'));
@@ -83,9 +83,9 @@ class PrinterController extends AdminController
     {
         $form = new Form(new Printer());
 
-        $form->number('brand_id', __('Brand id'));
+        $form->number('brands_id', __('Brand id'));
         $form->text('model', __('Model'));
-        $form->number('manufactor_id', __('Manufactor id'));
+        $form->number('manufactors_id', __('Manufactor id'));
         $form->text('type', __('Type'));
         $form->date('release_date', __('Release date'))->default(date('YY-mm-dd'));
         $form->number('onsale', __('Onsale'));

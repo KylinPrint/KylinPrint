@@ -29,12 +29,9 @@ class BrandController extends AdminController
         $grid->column('id', __('Id'));
         $grid->column('name', __('Name'));
         $grid->column('name_en', __('Name en'));
-        $grid->column('manufactor_id', __('Manufactor id'));
+        $grid->column('manufactors_id', __('Manufactor id'));
 
-        $grid->column('printers', 'Printers')->display(function ($printers) {
-            $count = count($printers);
-            return "<span class='label label-warning'>{$count}</span>";
-        });
+        $grid->column('printers', 'Printers')->display(function ($printers) { return count($printers); });
 
         return $grid;
     }
@@ -50,9 +47,9 @@ class BrandController extends AdminController
         $show = new Show(Brand::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('brand_name', __('Brand name'));
-        $show->field('brand_name_en', __('Brand name en'));
-        $show->field('manufactor_id', __('Manufactor id'));
+        $show->field('name', __('Brand name'));
+        $show->field('name_en', __('Brand name en'));
+        $show->field('manufactors_id', __('Manufactor id'));
 
         return $show;
     }
@@ -66,9 +63,9 @@ class BrandController extends AdminController
     {
         $form = new Form(new Brand());
 
-        $form->text('brand_name', __('Brand name'));
-        $form->text('brand_name_en', __('Brand name en'));
-        $form->number('manufactor_id', __('Manufactor id'));
+        $form->text('name', __('Brand name'));
+        $form->text('name_en', __('Brand name en'));
+        $form->number('manufactors_id', __('Manufactor id'));
 
         return $form;
     }
