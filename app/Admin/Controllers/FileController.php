@@ -26,9 +26,9 @@ class FileController extends AdminController
     {
         $grid = new Grid(new File());
 
-        $grid->column('id', __('Id'));
+        $grid->column('id', __('ID'))->hide();
+        $grid->column('solution_id', __('Solution'));
         $grid->column('path', __('Path'));
-        $grid->column('solution_id', __('Solution id'));
 
         return $grid;
     }
@@ -43,7 +43,7 @@ class FileController extends AdminController
     {
         $show = new Show(File::findOrFail($id));
 
-        $show->field('id', __('Id'));
+        $show->field('id', __('ID'));
         $show->field('path', __('Path'));
         $show->field('solution_id', __('Solution id'));
 

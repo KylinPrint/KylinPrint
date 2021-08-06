@@ -14,7 +14,11 @@ class Solution extends Model
     protected $fillable = [
         'name',
         'comment',
-        'source'
+        'source',
+        'amd64',
+        'arm64',
+        'mips64el',
+        'loongarch64'
     ];
 
     public function printers()

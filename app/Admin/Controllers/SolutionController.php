@@ -26,10 +26,14 @@ class SolutionController extends AdminController
     {
         $grid = new Grid(new Solution());
 
-        $grid->column('id', __('Id'));
+        $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Solution name'));
         $grid->column('comment', __('Solution comment'));
         $grid->column('source', __('Solution source'));
+        $grid->column('amd64', __('amd64'))->bool();
+        $grid->column('arm64', __('arm64'))->bool();
+        $grid->column('mips64el', __('mips64el'))->bool();
+        $grid->column('loongarch64', __('loongarch64'))->bool();
 
         return $grid;
     }
@@ -44,7 +48,7 @@ class SolutionController extends AdminController
     {
         $show = new Show(Solution::findOrFail($id));
 
-        $show->field('id', __('Id'));
+        $show->field('id', __('ID'));
         $show->field('name', __('Solution name'));
         $show->field('comment', __('Solution comment'));
         $show->field('source', __('Solution source'));

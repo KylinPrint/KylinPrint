@@ -54,9 +54,8 @@ class PrinterController extends AdminController
                 $solutions = $model->solutions()->take(10)->get()->map(function ($comment) {
                     return $comment->only(['name', 'comment']);
                 });
-
                 return new Table(['名称', '摘要'], $solutions->toArray());
-        });
+        }); //TODO checked列
 
         $grid->column('created_at')->hide()->date('Y-m-d');
         $grid->column('updated_at')->hide()->date('Y-m-d');

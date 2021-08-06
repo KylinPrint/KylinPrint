@@ -46,7 +46,7 @@ class BrandController extends AdminController
     {
         $show = new Show(Brand::findOrFail($id));
 
-        $show->field('id', __('Id'));
+        $show->field('id', __('ID'));
         $show->field('name', __('Brand name'));
         $show->field('name_en', __('Brand name en'));
         $show->field('manufactors_id', __('Manufactor id'));
