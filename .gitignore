@@ -23,6 +23,7 @@ yarn-error.log
 
 # Composer
 /vendor
+composer.lock
 
 
 ## IDE
