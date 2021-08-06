@@ -12,17 +12,18 @@ class Bind extends Model
     protected $table = 'binds';
 
     protected $fillable = [
-        'printer',
-        'solution'
+        'printers_id',
+        'solutions_id',
+        'checked'
     ];
 
     public function printers()
     {
-        return $this->belongsTo(Printer::class);
+        return $this->belongsToMany(Printer::class);
     }
 
     public function solutions()
     {
-        return $this->belongsTo(Solution::class);
+        return $this->belongsToMany(Solution::class);
     }
 }

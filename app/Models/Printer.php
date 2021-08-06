@@ -25,8 +25,8 @@ class Printer extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function binds()
+    public function solutions()
     {
-        return $this->hasOne(Bind::class);
+        return $this->belongsToMany(Solution::class, 'binds', 'printers_id', 'solutions_id');
     }
 }

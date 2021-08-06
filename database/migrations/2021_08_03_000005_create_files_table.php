@@ -16,7 +16,7 @@ class CreateFilesTable extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();                       //附件ID
             $table->string('path');             //附件路径
-            $table->foreignId('solution_id')
+            $table->foreignId('solutions_id')
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');          //所属解决方案

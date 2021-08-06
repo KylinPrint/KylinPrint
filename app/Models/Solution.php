@@ -17,9 +17,9 @@ class Solution extends Model
         'source'
     ];
 
-    public function binds()
+    public function printers()
     {
-        return $this->hasMany(Bind::class);
+        return $this->belongsToMany(Printer::class, 'binds', 'solutions_id', 'printers_id');
     }
 
     public function files()

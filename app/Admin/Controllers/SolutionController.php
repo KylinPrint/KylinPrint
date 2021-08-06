@@ -27,9 +27,9 @@ class SolutionController extends AdminController
         $grid = new Grid(new Solution());
 
         $grid->column('id', __('Id'));
-        $grid->column('solution_name', __('Solution name'));
-        $grid->column('solution_comment', __('Solution comment'));
-        $grid->column('solution_source', __('Solution source'));
+        $grid->column('name', __('Solution name'));
+        $grid->column('comment', __('Solution comment'));
+        $grid->column('source', __('Solution source'));
 
         return $grid;
     }
@@ -45,9 +45,9 @@ class SolutionController extends AdminController
         $show = new Show(Solution::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('solution_name', __('Solution name'));
-        $show->field('solution_comment', __('Solution comment'));
-        $show->field('solution_source', __('Solution source'));
+        $show->field('name', __('Solution name'));
+        $show->field('comment', __('Solution comment'));
+        $show->field('source', __('Solution source'));
 
         return $show;
     }
@@ -61,9 +61,9 @@ class SolutionController extends AdminController
     {
         $form = new Form(new Solution());
 
-        $form->text('solution_name', __('Solution name'));
-        $form->text('solution_comment', __('Solution comment'));
-        $form->text('solution_source', __('Solution source'));
+        $form->text('name', __('Solution name'));
+        $form->text('comment', __('Solution comment'));
+        $form->text('source', __('Solution source'));
 
         return $form;
     }

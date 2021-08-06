@@ -9,6 +9,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Table;
 
 class PrinterController extends AdminController
 {
@@ -46,6 +47,17 @@ class PrinterController extends AdminController
             else                         { return '自动双面'; }
         });
         $grid->column('pagesize', __('Pagesize'));
+
+        $grid->column('solutions', __('Solutions'))
+            ->display(function ($solutions) { return count($solutions); })
+            ->modal('解决方案', function ($model) {
+                $solutions = $model->solutions()->take(10)->get()->map(function ($comment) {
+                    return $comment->only(['name', 'comment']);
+                });
+
+                return new Table(['名称', '摘要'], $solutions->toArray());
+        });
+
         $grid->column('created_at')->hide()->date('Y-m-d');
         $grid->column('updated_at')->hide()->date('Y-m-d');
 
