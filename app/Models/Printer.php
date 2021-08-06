@@ -12,7 +12,6 @@ class Printer extends Model
     protected $fillable = [
         'brands_id',
         'model',
-        'manufactors_id',
         'type',
         'release_date',
         'onsale',
@@ -24,11 +23,6 @@ class Printer extends Model
     public function brands()
     {
         return $this->belongsTo(Brand::class);
-    }
-
-    public function manufactors()
-    {
-        return $this->belongsTo(Manufactor::class);
     }
 
     public function binds()

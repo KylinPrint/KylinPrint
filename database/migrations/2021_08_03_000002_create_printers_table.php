@@ -20,11 +20,6 @@ class CreatePrintersTable extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');                              //品牌ID
             $table->string('model')->unique();                      //型号
-            $table->foreignId('manufactor_id')
-                ->nullable()
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('cascade');                              //厂商ID
             $table->enum('type', ['mono', 'color'])
                 ->nullable();                                       //彩色类型
             $table->date('release_date')->nullable();               //发售日期

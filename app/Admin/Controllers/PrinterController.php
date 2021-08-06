@@ -31,9 +31,9 @@ class PrinterController extends AdminController
 
         $grid->column('id', __('ID'))->sortable()->hide();
 
+        //TODO 一排序就炸
         $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
         $grid->column('model', __('Model'))->sortable();
-        $grid->column('manufactors.name', __('Manufactor'))->hide();
         $grid->column('type', __('Printer Type'))->display(function ($printerType) {
             return $printerType ? '黑白' : '彩色';
         });
@@ -65,7 +65,6 @@ class PrinterController extends AdminController
         $show->field('id', __('ID'));
         $show->field('brands.name', __('Brand'));
         $show->field('model', __('Model'));
-        $show->field('manufactors.name', __('Manufactor'));
         $show->field('type', __('Printer Type'));
         $show->field('release_date', __('Release date'));
         $show->field('onsale', __('Onsale'));
@@ -92,7 +91,6 @@ class PrinterController extends AdminController
 
         $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
         $form->text('model', __('Model'));
-        $form->select('manufactors_id', __('Manufactors'))->options(Manufactor::all()->pluck('name', 'id'));
         $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
         $form->date('release_date', __('Release date'))->default(date('YY-mm-dd'));
         $form->switch('onsale', __('Onsale'))->states($states);
