@@ -54,9 +54,7 @@ class PrinterController extends AdminController
         //TODO 一排序就炸
         $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
         $grid->column('model', __('Model'))->sortable();
-        $grid->column('type', __('Printer Type'))->display(function ($printerType) {
-            return $printerType ? '黑白' : '彩色';
-        });
+        $grid->column('type', __('Printer Type'));
         $grid->column('release_date', __('Release date'));
         $grid->column('onsale', __('Onsale'))->bool();
         $grid->column('network', __('Network'))->bool();
