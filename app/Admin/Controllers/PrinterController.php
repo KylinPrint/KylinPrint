@@ -80,6 +80,7 @@ class PrinterController extends AdminController
                     return $checked->only(['checked']);
                 })->toArray();
                 //TODO 别骂了别骂了
+                $ret[] = array();
                 foreach($solutions as $key=>$value)
                     $ret[] = array_merge($value, $binds[$key]);
                 return new Table(['ID', '名称', '摘要', '已验证'], $ret);
