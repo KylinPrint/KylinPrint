@@ -57,13 +57,14 @@ class PrinterController extends AdminController
         $grid->column('type', __('Printer Type'))->display(function ($printerType) {
             return $printerType ? '黑白' : '彩色';
         });
-        $grid->column('release_date', __('Release date'))->default(date('YY-mm-dd'));
+        $grid->column('release_date', __('Release date'));
         $grid->column('onsale', __('Onsale'))->bool();
         $grid->column('network', __('Network'))->bool();
         $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
             elseif ($duplex == 'manual') { return '手动双面'; }
-            else                         { return '自动双面'; }
+            elseif ($duplex == 'manual') { return '自动双面'; }
+            else { return ''; }
         });
         $grid->column('pagesize', __('Pagesize'));
 
