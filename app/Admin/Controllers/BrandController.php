@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Brand;
+use App\Models\Manufactor;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -27,8 +28,8 @@ class BrandController extends AdminController
         $grid = new Grid(new Brand());
 
         $grid->column('id', __('ID'))->hide();
-        $grid->column('name', __('Brand Name'));
-        $grid->column('name_en', __('Brand Name en'));
+        $grid->column('name', __('Brand name'));
+        $grid->column('name_en', __('Brand name en'));
         $grid->column('manufactors.name', __('Manufactor'));
 
         $grid->column('printers', __('Printers Count'))->display(function ($printers) { return count($printers); });
@@ -49,7 +50,7 @@ class BrandController extends AdminController
         $show->field('id', __('ID'));
         $show->field('name', __('Brand name'));
         $show->field('name_en', __('Brand name en'));
-        $show->field('manufactors_id', __('Manufactor id'));
+        $show->field('manufactors.name', __('Manufactor'));
 
         return $show;
     }
@@ -65,7 +66,7 @@ class BrandController extends AdminController
 
         $form->text('name', __('Brand name'));
         $form->text('name_en', __('Brand name en'));
-        $form->number('manufactors_id', __('Manufactor id'));
+        $form->select('manufactors_id', __('Manufactor'))->options(Manufactor::all()->pluck('name', 'id'));
 
         return $form;
     }

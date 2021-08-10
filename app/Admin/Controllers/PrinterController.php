@@ -125,6 +125,7 @@ class PrinterController extends AdminController
         $show->field('duplex', __('Duplex'));
         $show->field('pagesize', __('Pagesize'));
 
+        //TODO 解决方案
         return $show;
     }
 
@@ -159,6 +160,7 @@ class PrinterController extends AdminController
         $form->confirm('确定创建吗？', 'create');
         $form->confirm('确定提交吗？');
 
+        //TODO 解决方案
         return $form;
     }
 }
