@@ -69,7 +69,7 @@ class PrinterController extends AdminController
 
         $grid->column('solutions', __('Solutions'))
             ->display(function ($solutions) { return count($solutions); })
-            ->expand(function ($model){
+            ->modal(__('Solutions'), function ($model){
                 //解决方案
                 $solutions = $model->solutions()->get()->map(function ($comment) {
                     return $comment->only(['id', 'name', 'comment']);
