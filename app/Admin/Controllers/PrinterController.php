@@ -54,14 +54,18 @@ class PrinterController extends AdminController
         //TODO 一排序就炸
         $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
         $grid->column('model', __('Model'))->sortable();
-        $grid->column('type', __('Printer Type'));
+        $grid->column('type', __('Printer Type'))->display(function ($printerType) {
+            if     ($printerType == 'mono') { return '黑白'; }
+            elseif ($printerType == 'color') { return '彩色'; }
+            else { return ''; }
+        });
         $grid->column('release_date', __('Release date'));
         $grid->column('onsale', __('Onsale'))->bool();
         $grid->column('network', __('Network'))->bool();
         $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
             elseif ($duplex == 'manual') { return '手动双面'; }
-            elseif ($duplex == 'manual') { return '自动双面'; }
+            elseif ($duplex == 'duplex') { return '自动双面'; }
             else { return ''; }
         });
         $grid->column('pagesize', __('Pagesize'));
