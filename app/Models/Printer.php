@@ -29,4 +29,9 @@ class Printer extends Model
     {
         return $this->belongsToMany(Solution::class, 'binds', 'printers_id', 'solutions_id');
     }
+
+    public function binds()
+    {
+        return $this->hasMany(Bind::class, 'printers_id');
+    }
 }

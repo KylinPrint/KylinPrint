@@ -4,10 +4,10 @@ namespace App\Admin\Controllers;
 
 use App\Models\Printer;
 use App\Models\Brand;
-use App\Models\Manufactor;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
+use Encore\Admin\Grid\Filter\Like;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
 
@@ -28,7 +28,26 @@ class PrinterController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Printer());
-        $grid->fixColumns(3);   //冻结前三列
+        //$grid->fixColumns(3);   //冻结前三列
+
+        $grid->quickSearch('model');    //快速搜索
+        $grid->filter(function($filter){
+            // 去掉默认的id过滤器
+            $filter->disableIdFilter();
+        
+            // 在这里添加字段过滤器
+            
+        });
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('brands_id', __('Brand'), [
+                1 => 'HP',
+                2 => 'Canon',
+            ]);
+            $selector->select('onsale', __('Onsale'), [
+                1 => '在售',
+                0 => '停产',
+            ]);
+        }); //表头过滤
 
         $grid->column('id', __('ID'))->sortable()->hide();
 
@@ -50,12 +69,20 @@ class PrinterController extends AdminController
 
         $grid->column('solutions', __('Solutions'))
             ->display(function ($solutions) { return count($solutions); })
-            ->modal('解决方案', function ($model) {
-                $solutions = $model->solutions()->take(10)->get()->map(function ($comment) {
-                    return $comment->only(['name', 'comment']);
-                });
-                return new Table(['名称', '摘要'], $solutions->toArray());
-        }); //TODO checked列
+            ->expand(function ($model){
+                //解决方案
+                $solutions = $model->solutions()->get()->map(function ($comment) {
+                    return $comment->only(['id', 'name', 'comment']);
+                })->toArray();
+                //是否验证
+                $binds = $model->binds()->get()->map(function ($checked) {
+                    return $checked->only(['checked']);
+                })->toArray();
+                //TODO 别骂了别骂了
+                foreach($solutions as $key=>$value)
+                    $ret[] = array_merge($value, $binds[$key]);
+                return new Table(['ID', '名称', '摘要', '已验证'], $ret);
+        });
 
         $grid->column('created_at')->hide()->date('Y-m-d');
         $grid->column('updated_at')->hide()->date('Y-m-d');
