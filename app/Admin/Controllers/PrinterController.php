@@ -86,10 +86,21 @@ class PrinterController extends AdminController
                 foreach($solutions as $key=>$value)
                     $ret[] = array_merge($value, $binds[$key]);
                 return new Table(['ID', '名称', '摘要', '已验证'], $ret);
-        });
+        });//TODO 解决方案的超链接
 
         $grid->column('created_at')->hide()->date('Y-m-d');
         $grid->column('updated_at')->hide()->date('Y-m-d');
+
+        $grid->export(function ($export) {
+            $export->originalValue(['onsale', 'network']);
+            $export->column('solutions', function ($value, $original) {
+                $ret = array();
+                foreach ($original as $key => $value) {
+                    array_push($ret, $value['name']);
+                }
+                return implode(',', $ret);
+            });
+        });
 
         return $grid;
     }
