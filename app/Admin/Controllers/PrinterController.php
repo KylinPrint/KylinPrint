@@ -60,8 +60,16 @@ class PrinterController extends AdminController
             else { return ''; }
         });
         $grid->column('release_date', __('Release date'));
-        $grid->column('onsale', __('Onsale'))->bool();
-        $grid->column('network', __('Network'))->bool();
+        $grid->column('onsale', __('Onsale'))->display(function ($onsale) {
+            if     ($onsale == '0') { return '<i class="fa fa-check text-green"></i>'; }
+            elseif ($onsale == '1') { return '<i class="fa fa-close text-red"></i>'; }
+            else { return ''; }
+        });
+        $grid->column('network', __('Network'))->display(function ($network) {
+            if     ($network == '0') { return '<i class="fa fa-check text-green"></i>'; }
+            elseif ($network == '1') { return '<i class="fa fa-close text-red"></i>'; }
+            else { return ''; }
+        });
         $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
             elseif ($duplex == 'manual') { return '手动双面'; }
