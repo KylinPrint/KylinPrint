@@ -154,7 +154,7 @@ class PrinterController extends AdminController
         $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
         $form->text('model', __('Model'));
         $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
-        $form->date('release_date', __('Release date'))->default(date('YY-mm-dd'));
+        $form->date('release_date', __('Release date'));
         $form->switch('onsale', __('Onsale'))->states($states);
         $form->switch('network', __('Network'))->states($states);
         $form->select('duplex', __('Duplex'))->options([
