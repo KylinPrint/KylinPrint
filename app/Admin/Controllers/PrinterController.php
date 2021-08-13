@@ -10,6 +10,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Grid\Filter\Like;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
+use App\Admin\Actions\JumpInfo;
 
 class PrinterController extends AdminController
 {
@@ -117,15 +118,37 @@ class PrinterController extends AdminController
 
         $show->field('id', __('ID'));
         $show->field('brands.name', __('Brand'));
-        $show->field('model', __('Model'));
-        $show->field('type', __('Printer Type'));
-        $show->field('release_date', __('Release date'));
-        $show->field('onsale', __('Onsale'));
-        $show->field('network', __('Network'));
-        $show->field('duplex', __('Duplex'));
-        $show->field('pagesize', __('Pagesize'));
+        $show->model(__('Model'));
+        $show->type(__('Printer Type'));
+        $show->release_date(__('Release date'));
+        $show->onsale(__('Onsale'));
+        $show->network(__('Network'));
+        $show->duplex(__('Duplex'));
+        $show->pagesize(__('Pagesize'));
+        //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
+        $show->binds(__('Solutions'), function ($binds) {
+            $binds->disableFilter();
+            $binds->disableExport();
+            $binds->disableCreateButton();
+            // $solutions->resource('/admin/comments');
+            $binds->column('solutions.name', __('Solution name'));
+            $binds->column('solutions.comment', __('Solution comment'));
+            $binds->checked(__('Checked'))->display(function ($checked) {
+                if     ($checked == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
+                elseif ($checked == '1') { return '<i class="fa fa-check text-green"></i>'; }
+                else                     { return ''; };
+            });
 
-        //TODO 解决方案
+            $binds->actions(function ($actions) {
+
+                $actions->disableDelete();
+                $actions->disableEdit();     
+                $actions->disableView();
+                $actions->add(new JumpInfo($actions->row['id']));
+
+            });
+            return $binds;
+        });
         return $show;
     }
 

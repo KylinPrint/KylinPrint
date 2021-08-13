@@ -24,6 +24,6 @@ class Bind extends Model
 
     public function solutions()
     {
-        return $this->belongsToMany(Solution::class);
+        return $this->belongsTo(Solution::class);
     }
 }
