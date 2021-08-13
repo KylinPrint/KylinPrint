@@ -60,8 +60,16 @@ class PrinterController extends AdminController
             else { return ''; }
         });
         $grid->column('release_date', __('Release date'));
-        $grid->column('onsale', __('Onsale'))->bool();
-        $grid->column('network', __('Network'))->bool();
+        $grid->column('onsale', __('Onsale'))->display(function ($onsale) {
+            if     ($onsale == '0') { return '<i class="fa fa-close text-red"></i>'; }
+            elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
+            else { return ''; }
+        });
+        $grid->column('network', __('Network'))->display(function ($network) {
+            if     ($network == '0') { return '<i class="fa fa-close text-red"></i>'; }
+            elseif ($network == '1') { return '<i class="fa fa-check text-green"></i>'; }
+            else { return ''; }
+        });
         $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
             elseif ($duplex == 'manual') { return '手动双面'; }
@@ -70,23 +78,7 @@ class PrinterController extends AdminController
         });
         $grid->column('pagesize', __('Pagesize'));
 
-        $grid->column('solutions', __('Solutions'))
-            ->display(function ($solutions) { return count($solutions); })
-            ->modal(__('Solutions'), function ($model){
-                //解决方案
-                $solutions = $model->solutions()->get()->map(function ($comment) {
-                    return $comment->only(['id', 'name', 'comment']);
-                })->toArray();
-                //是否验证
-                $binds = $model->binds()->get()->map(function ($checked) {
-                    return $checked->only(['checked']);
-                })->toArray();
-                //TODO 别骂了别骂了
-                $ret[] = array();
-                foreach($solutions as $key=>$value)
-                    $ret[] = array_merge($value, $binds[$key]);
-                return new Table(['ID', '名称', '摘要', '已验证'], $ret);
-        });//TODO 解决方案的超链接
+        $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
         $grid->column('created_at')->hide()->date('Y-m-d');
         $grid->column('updated_at')->hide()->date('Y-m-d');
@@ -115,16 +107,15 @@ class PrinterController extends AdminController
     {
         $show = new Show(Printer::findOrFail($id));
 
-        $show->field('id', __('ID'));
+        $show->id(__('ID'));
         $show->field('brands.name', __('Brand'));
-        $show->field('model', __('Model'));
-        $show->field('type', __('Printer Type'));
-        $show->field('release_date', __('Release date'));
-        $show->field('onsale', __('Onsale'));
-        $show->field('network', __('Network'));
-        $show->field('duplex', __('Duplex'));
-        $show->field('pagesize', __('Pagesize'));
-
+        $show->model(__('Model'));
+        $show->type(__('Printer Type'));
+        $show->release_date(__('Release date'));
+        $show->onsale(__('Onsale'));
+        $show->network(__('Network'));
+        $show->duplex(__('Duplex'));
+        $show->pagesize(__('Pagesize'));
         //TODO 解决方案
         return $show;
     }
@@ -146,7 +137,7 @@ class PrinterController extends AdminController
         $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
         $form->text('model', __('Model'));
         $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
-        $form->date('release_date', __('Release date'))->default(date('YY-mm-dd'));
+        $form->date('release_date', __('Release date'));
         $form->switch('onsale', __('Onsale'))->states($states);
         $form->switch('network', __('Network'))->states($states);
         $form->select('duplex', __('Duplex'))->options([
