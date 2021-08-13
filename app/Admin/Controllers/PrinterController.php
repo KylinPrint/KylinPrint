@@ -55,20 +55,20 @@ class PrinterController extends AdminController
         $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
         $grid->column('model', __('Model'))->sortable();
         $grid->column('type', __('Printer Type'))->display(function ($printerType) {
-            if     ($printerType == 'mono') { return '黑白'; }
+            if     ($printerType == 'mono')  { return '黑白'; }
             elseif ($printerType == 'color') { return '彩色'; }
-            else { return ''; }
+            else                             { return ''; }
         });
         $grid->column('release_date', __('Release date'));
         $grid->column('onsale', __('Onsale'))->display(function ($onsale) {
-            if     ($onsale == '0') { return '<i class="fa fa-close text-red"></i>'; }
+            if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
-            else { return ''; }
+            else                    { return ''; }
         });
         $grid->column('network', __('Network'))->display(function ($network) {
-            if     ($network == '0') { return '<i class="fa fa-close text-red"></i>'; }
+            if     ($network == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($network == '1') { return '<i class="fa fa-check text-green"></i>'; }
-            else { return ''; }
+            else                     { return ''; }
         });
         $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
@@ -107,7 +107,6 @@ class PrinterController extends AdminController
     {
         $show = new Show(Printer::findOrFail($id));
 
-        $show->id(__('ID'));
         $show->field('brands.name', __('Brand'));
         $show->model(__('Model'));
         $show->type(__('Printer Type'));
@@ -116,7 +115,19 @@ class PrinterController extends AdminController
         $show->network(__('Network'));
         $show->duplex(__('Duplex'));
         $show->pagesize(__('Pagesize'));
-        //TODO 解决方案
+        //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
+        $show->binds(__('Solutions'), function ($binds) {
+            $binds->disableFilter();
+            // $solutions->resource('/admin/comments');
+            $binds->column('solutions.name', __('Solution name'));
+            $binds->column('solutions.comment', __('Solution comment'));
+            $binds->checked(__('Checked'))->display(function ($checked) {
+                if     ($checked == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
+                elseif ($checked == '1') { return '<i class="fa fa-check text-green"></i>'; }
+                else                     { return ''; };
+            });
+            return $binds;
+        });
         return $show;
     }
 

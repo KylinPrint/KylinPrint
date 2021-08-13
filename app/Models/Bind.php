@@ -19,11 +19,11 @@ class Bind extends Model
 
     public function printers()
     {
-        return $this->belongsToMany(Printer::class);
+        return $this->belongsTo(Printer::class);
     }
 
     public function solutions()
     {
-        return $this->belongsToMany(Solution::class);
+        return $this->belongsTo(Solution::class);
     }
 }
