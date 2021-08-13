@@ -10,6 +10,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Grid\Filter\Like;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
+use App\Admin\Actions\JumpInfo;
 
 class PrinterController extends AdminController
 {
@@ -118,6 +119,8 @@ class PrinterController extends AdminController
         //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
         $show->binds(__('Solutions'), function ($binds) {
             $binds->disableFilter();
+            $binds->disableExport();
+            $binds->disableCreateButton();
             // $solutions->resource('/admin/comments');
             $binds->column('solutions.name', __('Solution name'));
             $binds->column('solutions.comment', __('Solution comment'));
@@ -125,6 +128,14 @@ class PrinterController extends AdminController
                 if     ($checked == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
                 elseif ($checked == '1') { return '<i class="fa fa-check text-green"></i>'; }
                 else                     { return ''; };
+            });
+
+            $binds->actions(function ($actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();     
+                $actions->disableView();
+                $actions->add(new JumpInfo($actions->row['id']));
+
             });
             return $binds;
         });
