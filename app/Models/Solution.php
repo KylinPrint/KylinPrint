@@ -30,4 +30,9 @@ class Solution extends Model
     {
         return $this->hasMany(File::class);
     }
+
+    public function binds()
+    {
+        return $this->hasMany(Bind::class, 'solutions_id');
+    }
 }
