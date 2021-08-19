@@ -8,9 +8,13 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Grid\Filter\Like;
+use Encore\Admin\Grid\Displayers\ContextMenuActions;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
 use App\Admin\Actions\JumpInfo;
+use App\Models\Industry_Tag;
+use App\Models\Principle_Tag;
+use App\Models\Printer_Type_Principle_Tag;
 
 class PrinterController extends AdminController
 {
@@ -31,6 +35,8 @@ class PrinterController extends AdminController
         $grid = new Grid(new Printer());
         //$grid->fixColumns(3);   //冻结前三列
 
+        $grid->setActionClass(ContextMenuActions::class);
+
         $grid->quickSearch('model');    //快速搜索
         $grid->filter(function($filter){
             // 去掉默认的id过滤器
@@ -48,6 +54,7 @@ class PrinterController extends AdminController
                 1 => '在售',
                 0 => '停产',
             ]);
+            
         }); //表头过滤
 
         $grid->column('id', __('ID'))->sortable()->hide();
@@ -60,6 +67,10 @@ class PrinterController extends AdminController
             elseif ($printerType == 'color') { return '彩色'; }
             else                             { return ''; }
         });
+
+
+        $grid->column('industry_tags',__('应用行业'))->pluck('name')->label();
+        $grid->column('principle_tags.name', __('打印机工作方式'));
         $grid->column('release_date', __('Release date'));
         $grid->column('onsale', __('Onsale'))->display(function ($onsale) {
             if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
@@ -111,6 +122,13 @@ class PrinterController extends AdminController
         $show->field('brands.name', __('Brand'));
         $show->model(__('Model'));
         $show->type(__('Printer Type'));
+
+        $show->field('industry_tags',__('应用行业'))->as(function($industry_tags){
+            $IndustryArr = array();
+            foreach($industry_tags as $value){$IndustryArr[] = $value['name'];}
+            return $IndustryArr;
+        })->label();
+        $show->field('principle_tags.name', __('打印机工作方式'));
         $show->release_date(__('Release date'));
         $show->onsale(__('Onsale'));
         $show->network(__('Network'));
@@ -159,6 +177,9 @@ class PrinterController extends AdminController
         $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
         $form->text('model', __('Model'));
         $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
+
+        $form->multipleSelect('industry_tags',__('应用行业'))->options(Industry_Tag::all()->pluck('name', 'id'));
+        $form->select('principle_tags_id', __('打印机工作方式'))->options(Principle_Tag::all()->pluck('name', 'id'));
         $form->date('release_date', __('Release date'));
         $form->switch('onsale', __('Onsale'))->states($states);
         $form->switch('network', __('Network'))->states($states);

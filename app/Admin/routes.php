@@ -18,4 +18,6 @@ Route::group([
     $router->resource('manufactors', ManufactorController::class);
     $router->resource('solutions', SolutionController::class);
     $router->resource('files', FileController::class);
+    $router->resource('tags', TagController::class);
+    $router->resource('tag_binds', TagBindController::class);
 });

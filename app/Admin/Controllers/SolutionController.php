@@ -26,6 +26,15 @@ class SolutionController extends AdminController
     {
         $grid = new Grid(new Solution());
 
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('source', __('解决方案来源'), [
+                1 => 'HP',
+                2 => 'Canon',
+                3 => 'Kylin'
+            ]);
+            
+        }); 
+
         $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Solution name'));
         $grid->column('comment', __('Solution comment'));
@@ -52,6 +61,9 @@ class SolutionController extends AdminController
         $show->field('name', __('Solution name'));
         $show->field('comment', __('Solution comment'));
         $show->field('source', __('Solution source'));
+        $show->detail()->unescape()->as(function($detail){ 
+            return $detail;
+        });
 
         return $show;
     }
@@ -68,6 +80,7 @@ class SolutionController extends AdminController
         $form->text('name', __('Solution name'));
         $form->text('comment', __('Solution comment'));
         $form->text('source', __('Solution source'));
+        $form->editor('detail');
 
         return $form;
     }

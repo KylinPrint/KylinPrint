@@ -23,6 +23,10 @@ class CreatePrintersTable extends Migration
             $table->enum('type', ['mono', 'color'])
                 ->nullable();                                       //彩色类型
             $table->date('release_date')->nullable();               //发售日期
+            $table->foreignId('principle_tags_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');                              //工作原理标签ID
             $table->smallInteger('onsale')->nullable();             //是否在售
             $table->smallInteger('network')->nullable();            //网络打印
             $table->enum('duplex', ['single', 'manual', 'duplex'])
