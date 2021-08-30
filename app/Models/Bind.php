@@ -14,6 +14,7 @@ class Bind extends Model
     protected $fillable = [
         'printers_id',
         'solutions_id',
+        'adapter',
         'checked'
     ];
 
@@ -26,4 +27,26 @@ class Bind extends Model
     {
         return $this->belongsTo(Solution::class);
     }
+
+    public function adapters()
+    {
+
+        return $this->hasMany(Adapter::class, 'adapters_id');
+    }
+
+    public function getAdapterAttribute($adapter)
+    {
+        if (is_string($adapter)) {
+            $adapter = explode(',', $adapter);
+        }
+
+        return $adapter;
+    } //拿adapter转成数组
+
+    public function setAdapterAttribute($adapter) {
+        if (is_array($adapter)){
+            $this->attributes['adapter'] = trim(implode(',',$adapter), ',');
+        }
+        
+    } //存adapter转成字符串
 }

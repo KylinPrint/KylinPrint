@@ -14,6 +14,7 @@ class CreateBindsTable extends Migration
     public function up()
     {
         Schema::create('binds', function (Blueprint $table) {
+            
             $table->foreignId('printers_id')
                 ->constrained()
                 ->onUpdate('cascade')
@@ -35,6 +36,7 @@ class CreateBindsTable extends Migration
             $table->smallInteger('v10sp1_amd')->nullable();
             $table->smallInteger('v10sp1_mips')->nullable();
             $table->smallInteger('v10sp1_loongarch')->nullable();
+            $table->string('adapter')->unique();
             $table->smallInteger('checked')->default(0);
             $table->primary(['printers_id', 'solutions_id']);
             $table->timestamps();

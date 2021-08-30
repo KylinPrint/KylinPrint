@@ -41,11 +41,21 @@ class Printer extends Model
 
     public function industry_tag_binds()
     {
-        return $this->hasMany(Industry_Tag_Bind::class, 'printer_id');
+        return $this->hasMany(Industry_Tag_Bind::class, 'printers_id');
     }
 
     public function principle_tags()
     {
         return $this->belongsTo(Principle_Tag::class);
+    }
+
+    public function project_tags()
+    {
+        return $this->belongsToMany(Project_Tag::class,'project_tag_binds', 'printers_id', 'project_tags_id');
+    }
+
+    public function adapters()
+    {
+        return $this->hasManyThrough(Adapter::class,Bind::class,'printers_id','binds_id','id','id');
     }
 }
