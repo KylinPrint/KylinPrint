@@ -3,10 +3,10 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Manufactor;
-use Encore\Admin\Controllers\AdminController;
-use Encore\Admin\Form;
-use Encore\Admin\Grid;
-use Encore\Admin\Show;
+use Dcat\Admin\Controllers\AdminController;
+use Dcat\Admin\Form;
+use Dcat\Admin\Grid;
+use Dcat\Admin\Show;
 
 class ManufactorController extends AdminController
 {
@@ -24,7 +24,7 @@ class ManufactorController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new Manufactor());
+        $grid = new Grid(Manufactor::with(['brands']));
 
         $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Manufactor'));
@@ -43,7 +43,7 @@ class ManufactorController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Manufactor::findOrFail($id));
+        $show = new Show($id, Manufactor::with(['brands']));
 
         $show->field('id', __('ID'));
         $show->field('name', __('Manufactor'));
@@ -59,7 +59,7 @@ class ManufactorController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new Manufactor());
+        $form = new Form(Manufactor::with(['brands']));
 
         $form->text('name', __('Manufactor'));
         $form->number('isconnected', __('Isconnected'));

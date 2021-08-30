@@ -4,13 +4,13 @@ namespace App\Admin\Controllers;
 
 use App\Models\Printer;
 use App\Models\Brand;
-use Encore\Admin\Controllers\AdminController;
-use Encore\Admin\Form;
-use Encore\Admin\Grid;
-use Encore\Admin\Grid\Filter\Like;
-use Encore\Admin\Grid\Displayers\ContextMenuActions;
-use Encore\Admin\Show;
-use Encore\Admin\Widgets\Table;
+use Dcat\Admin\Controllers\AdminController;
+use Dcat\Admin\Form;
+use Dcat\Admin\Grid;
+use Dcat\Admin\Grid\Filter\Like;
+use Dcat\Admin\Grid\Displayers\ContextMenuActions;
+use Dcat\Admin\Show;
+use Dcat\Admin\Widgets\Table;
 use App\Admin\Actions\JumpInfo;
 use App\Models\Bind;
 use App\Models\Industry_Tag;
@@ -36,7 +36,7 @@ class PrinterController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new Printer());
+        $grid = new Grid(Printer::with(['brands','solutions','binds']));
         //$grid->fixColumns(3);   //冻结前三列
 
         $grid->setActionClass(ContextMenuActions::class);
@@ -153,8 +153,8 @@ class PrinterController extends AdminController
 
         $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
-        $grid->column('created_at')->hide()->date('Y-m-d');
-        $grid->column('updated_at')->hide()->date('Y-m-d');
+        $grid->column('created_at')->hide();
+        $grid->column('updated_at')->hide();
         
 
         return $grid;
@@ -168,10 +168,10 @@ class PrinterController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Printer::findOrFail($id));
+        $show = new Show($id, Printer::with(['brands','solutions','binds','industry_tags']));
 
         $show->field('brands.name', __('Brand'));
-        $show->model(__('Model'));
+        //$show->model(__('Model'));
         $show->type(__('Printer Type'));
 
         $show->field('industry_tags',__('应用行业'))->as(function($industry_tags){
@@ -219,7 +219,7 @@ class PrinterController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new Printer());
+        $form = new Form(Printer::with(['brands','solutions','binds']));
 
         $states = [
             'on'  => ['value' => 1, 'text' => '是', 'color' => 'success'],
@@ -233,8 +233,8 @@ class PrinterController extends AdminController
         $form->multipleSelect('industry_tags',__('应用行业'))->options(Industry_Tag::all()->pluck('name', 'id'));
         $form->select('principle_tags_id', __('打印机工作方式'))->options(Principle_Tag::all()->pluck('name', 'id'));
         $form->date('release_date', __('Release date'));
-        $form->switch('onsale', __('Onsale'))->states($states);
-        $form->switch('network', __('Network'))->states($states);
+        $form->switch('onsale', __('Onsale'))->options($states);
+        $form->switch('network', __('Network'))->options($states);
        
         $form->select('duplex', __('Duplex'))->options([
             'single' => __('Single'),
@@ -242,13 +242,29 @@ class PrinterController extends AdminController
             'duplex' => __('Auto Duplex')
         ]);
         $form->text('pagesize', __('Pagesize'));
+
         
-        $form->multipleSelect('solutions',__('Solution name'))->options(Solution::all()->pluck('name', 'id'));
+
+        
+        $form->multipleSelect('solutions',__('Solution name'))
+        ->options(Solution::all()->pluck('name', 'id'))
+        ->customFormat(function ($v) {
+            if (! $v) {
+                return [];
+            }
+
+            // 从数据库中查出的二维数组中转化成ID
+            return array_column($v, 'id');
+        });
 
         $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
             
-            $form->text('solutions_id');
-
+            // $sid = $form->model()->solutions_id;
+            // if(1){};
+            // $sname = Solution::where('id',$sid)->pluck('name')->first();
+            //拿到一个空模型nm，这块考虑回调弹个表单
+            
+            //$form->multipleSelect('adapter',$sname)->options([
             $form->multipleSelect('adapter')->options([
                 'v4_arm' => 'v4_arm','v4_amd' => 'v4_amd','v4_mips' => 'v4_mips',
                 'v7_arm' => 'v7_arm','v7_amd' => 'v7_amd','v7_mips' => 'v7_mips',
@@ -259,8 +275,8 @@ class PrinterController extends AdminController
             $form->select('checked')->options([
                 0 => '未验证',1 => '已验证'
             ]);        
-        })->disableDelete()->disableCreate()->useTable();
-        //无法获取当前实例，回调里面可以
+        })->disableDelete()->disableCreate();
+        
 
         $form->hidden('adapter_status');
 

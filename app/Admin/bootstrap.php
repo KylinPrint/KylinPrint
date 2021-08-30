@@ -7,10 +7,10 @@
  * Bootstraper for Admin.
  *
  * Here you can remove builtin form field:
- * Encore\Admin\Form::forget(['map', 'editor']);
+ * Dcat\Admin\Form::forget(['map', 'editor']);
  *
  * Or extend custom form field:
- * Encore\Admin\Form::extend('php', PHPEditor::class);
+ * Dcat\Admin\Form::extend('php', PHPEditor::class);
  *
  * Or require js and css assets:
  * Admin::css('/packages/prettydocs/css/styles.css');
@@ -18,12 +18,12 @@
  *
  */
 use App\Admin\Extensions\WangEditor;
-use Encore\Admin\Form;
+use Dcat\Admin\Form;
 
 
 
 //Form::forget('map');
 //Form::forget('editor');
-Form::extend('wang-editor', WangEditor::class);
 
-//Encore\Admin\Form::forget(['map', 'editor']);
+
+//Dcat\Admin\Form::forget(['map', 'editor']);

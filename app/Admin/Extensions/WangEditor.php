@@ -2,7 +2,7 @@
 
 namespace App\Admin\Extensions;
 
-use Encore\Admin\Form\Field;
+use Dcat\Admin\Form\Field;
 
 class WangEditor extends Field
 {

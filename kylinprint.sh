@@ -27,7 +27,7 @@ else
     echo "php found"
 fi
 
-php artisan vendor:publish --provider="Encore\Admin\AdminServiceProvider"
+php artisan vendor:publish --provider="Dcat\Admin\AdminServiceProvider"
 php artisan migrate
 php artisan key:generate
 

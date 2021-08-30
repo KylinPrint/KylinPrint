@@ -4,28 +4,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin name
+    | dcat-admin name
     |--------------------------------------------------------------------------
     |
-    | This value is the name of laravel-admin, This setting is displayed on the
+    | This value is the name of dcat-admin, This setting is displayed on the
     | login page.
     |
     */
-    'name' => env('APP_NAME', 'Laravel-admin'),
+    'name' => 'Dcat Admin',
+
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin logo
+    | dcat-admin logo
     |--------------------------------------------------------------------------
     |
     | The logo of all admin pages. You can also set it as an image by using a
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>Kylin</b> Print',
+    'logo' => '<img src="/vendors/dcat-admin/images/logo.png" width="35"> &nbsp;Dcat Admin',
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin mini logo
+    | dcat-admin mini logo
     |--------------------------------------------------------------------------
     |
     | The logo of all admin pages when the sidebar menu is collapsed. You can
@@ -33,21 +34,21 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>KP</b>',
+    'logo-mini' => '<img src="/vendors/dcat-admin/images/logo.png">',
+
+    /*
+     |--------------------------------------------------------------------------
+     | User default avatar
+     |--------------------------------------------------------------------------
+     |
+     | Set a default avatar for newly created users.
+     |
+     */
+    'default_avatar' => '@admin/images/default-avatar.jpg',
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin bootstrap setting
-    |--------------------------------------------------------------------------
-    |
-    | This value is the path of laravel-admin bootstrap file.
-    |
-    */
-    'bootstrap' => app_path('Admin/bootstrap.php'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Laravel-admin route settings
+    | dcat-admin route settings
     |--------------------------------------------------------------------------
     |
     | The routing configuration of the admin page, including the path prefix,
@@ -66,7 +67,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin install directory
+    | dcat-admin install directory
     |--------------------------------------------------------------------------
     |
     | The installation directory of the controller and routing configuration
@@ -78,13 +79,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin html title
+    | dcat-admin html title
     |--------------------------------------------------------------------------
     |
     | Html title for all pages.
     |
     */
-    'title' => env('APP_NAME', 'Admin'),
+    'title' => 'Admin',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Assets hostname
+    |--------------------------------------------------------------------------
+    |
+   */
+    'assets_server' => env('ADMIN_ASSETS_SERVER'),
 
     /*
     |--------------------------------------------------------------------------
@@ -98,7 +107,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin auth setting
+    | dcat-admin auth setting
     |--------------------------------------------------------------------------
     |
     | Authentication settings for all admin pages. Include an authentication
@@ -108,6 +117,7 @@ return [
     |
     */
     'auth' => [
+        'enable' => true,
 
         'controller' => App\Admin\Controllers\AuthController::class,
 
@@ -123,26 +133,85 @@ return [
         'providers' => [
             'admin' => [
                 'driver' => 'eloquent',
-                'model'  => Encore\Admin\Auth\Database\Administrator::class,
+                'model'  => Dcat\Admin\Models\Administrator::class,
             ],
         ],
 
         // Add "remember me" to login form
         'remember' => true,
 
-        // Redirect to the specified URI when user is not authorized.
-        'redirect_to' => 'auth/login',
-
-        // The URIs that should be excluded from authorization.
-        'excepts' => [
+        // All method to path like: auth/users/*/edit
+        // or specific method to path like: get:auth/users.
+        'except' => [
             'auth/login',
             'auth/logout',
         ],
+
+    ],
+
+    'grid' => [
+
+        /*
+        |--------------------------------------------------------------------------
+        | The global Grid action display class.
+        |--------------------------------------------------------------------------
+        */
+        'grid_action_class' => Dcat\Admin\Grid\Displayers\DropdownActions::class,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin upload setting
+    | dcat-admin helpers setting.
+    |--------------------------------------------------------------------------
+    */
+    'helpers' => [
+        'enable' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | dcat-admin permission setting
+    |--------------------------------------------------------------------------
+    |
+    | Permission settings for all admin pages.
+    |
+    */
+    'permission' => [
+        // Whether enable permission.
+        'enable' => true,
+
+        // All method to path like: auth/users/*/edit
+        // or specific method to path like: get:auth/users.
+        'except' => [
+            '/',
+            'auth/login',
+            'auth/logout',
+            'auth/setting',
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | dcat-admin menu setting
+    |--------------------------------------------------------------------------
+    |
+    */
+    'menu' => [
+        'cache' => [
+            // enable cache or not
+            'enable' => false,
+            'store'  => 'file',
+        ],
+
+        // Whether enable menu bind to a permission.
+        'bind_permission' => true,
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | dcat-admin upload setting
     |--------------------------------------------------------------------------
     |
     | File system configuration for form upload files and images, including
@@ -152,7 +221,7 @@ return [
     'upload' => [
 
         // Disk in `config/filesystem.php`.
-        'disk' => 'admin',
+        'disk' => 'public',
 
         // Image and file upload path under the disk above.
         'directory' => [
@@ -163,10 +232,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel-admin database settings
+    | dcat-admin database settings
     |--------------------------------------------------------------------------
     |
-    | Here are database settings for laravel-admin builtin model & tables.
+    | Here are database settings for dcat-admin builtin model & tables.
     |
     */
     'database' => [
@@ -176,26 +245,26 @@ return [
 
         // User tables and model.
         'users_table' => 'admin_users',
-        'users_model' => Encore\Admin\Auth\Database\Administrator::class,
+        'users_model' => Dcat\Admin\Models\Administrator::class,
 
         // Role table and model.
         'roles_table' => 'admin_roles',
-        'roles_model' => Encore\Admin\Auth\Database\Role::class,
+        'roles_model' => Dcat\Admin\Models\Role::class,
 
         // Permission table and model.
         'permissions_table' => 'admin_permissions',
-        'permissions_model' => Encore\Admin\Auth\Database\Permission::class,
+        'permissions_model' => Dcat\Admin\Models\Permission::class,
 
         // Menu table and model.
         'menu_table' => 'admin_menu',
-        'menu_model' => Encore\Admin\Auth\Database\Menu::class,
+        'menu_model' => Dcat\Admin\Models\Menu::class,
 
         // Pivot table for table above.
         'operation_log_table'    => 'admin_operation_log',
-        'user_permissions_table' => 'admin_user_permissions',
         'role_users_table'       => 'admin_role_users',
         'role_permissions_table' => 'admin_role_permissions',
         'role_menu_table'        => 'admin_role_menu',
+        'permission_menu_table'  => 'admin_permission_menu',
     ],
 
     /*
@@ -203,78 +272,46 @@ return [
     | User operation log setting
     |--------------------------------------------------------------------------
     |
-    | By setting this option to open or close operation log in laravel-admin.
+    | By setting this option to open or close operation log in dcat-admin.
     |
     */
     'operation_log' => [
 
         'enable' => true,
 
-        /*
-         * Only logging allowed methods in the list
-         */
+        // Only logging allowed methods in the list
         'allowed_methods' => ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'],
 
-        /*
-         * Routes that will not log to database.
-         *
-         * All method to path like: admin/auth/logs
-         * or specific method to path like: get:admin/auth/logs.
-         */
+        'secret_fields' => [
+            'password',
+            'password_confirmation',
+        ],
+
+        // Routes that will not log to database.
+        // All method to path like: auth/logs/*/edit
+        // or specific method to path like: get:auth/logs.
         'except' => [
-            env('ADMIN_ROUTE_PREFIX', 'admin').'/auth/logs*',
+            'auth/logs*',
         ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Indicates whether to check route permission.
-    |--------------------------------------------------------------------------
-    */
-    'check_route_permission' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Indicates whether to check menu roles.
-    |--------------------------------------------------------------------------
-    */
-    'check_menu_roles'       => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | User default avatar
-    |--------------------------------------------------------------------------
-    |
-    | Set a default avatar for newly created users.
-    |
-    */
-    'default_avatar' => '/vendor/laravel-admin/AdminLTE/dist/img/user2-160x160.jpg',
 
     /*
     |--------------------------------------------------------------------------
     | Admin map field provider
     |--------------------------------------------------------------------------
     |
-    | Supported: "tencent", "google", "yandex".
+    | Supported: "tencent", "google", "yandex", "baidu".
     |
     */
-    'map_provider' => 'google',
+    'map' => [
+        'provider' => 'baidu',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Skin
-    |--------------------------------------------------------------------------
-    |
-    | This value is the skin of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
-    |
-    | Supported:
-    |    "skin-blue", "skin-blue-light", "skin-yellow", "skin-yellow-light",
-    |    "skin-green", "skin-green-light", "skin-purple", "skin-purple-light",
-    |    "skin-red", "skin-red-light", "skin-black", "skin-black-light".
-    |
-    */
-    'skin' => 'skin-blue-light',
+        'keys' => [
+            'tencent' => env('TENCENT_MAP_API_KEY'),
+            'google' => env('GOOGLE_API_KEY'),
+            'baidu' => env('BAIDU_MAP_API_KEY'),
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -282,53 +319,31 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value is the layout of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
-    |
-    | Supported: "fixed", "layout-boxed", "layout-top-nav", "sidebar-collapse",
-    | "sidebar-mini".
-    |
     */
-    'layout' => ['sidebar-mini', 'sidebar-collapse'],
+    'layout' => [
+        // indigo, blue, blue-light, blue-dark, green
+        'color' => 'indigo',
+
+        'body_class' => '',
+
+        'sidebar_collapsed' => false,
+
+        // light, primary, dark
+        'sidebar_style' => 'light',
+
+        'dark_mode_switch' => false,
+
+        // bg-primary, bg-info, bg-warning, bg-success, bg-danger, bg-dark
+        'navbar_color' => '',
+    ],
 
     /*
     |--------------------------------------------------------------------------
-    | Login page background image
+    | The exception handler class
     |--------------------------------------------------------------------------
-    |
-    | This value is used to set the background image of login page.
     |
     */
-    'login_background_image' => '',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Show version at footer
-    |--------------------------------------------------------------------------
-    |
-    | Whether to display the version number of laravel-admin at the footer of
-    | each page
-    |
-    */
-    'show_version' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Show environment at footer
-    |--------------------------------------------------------------------------
-    |
-    | Whether to display the environment at the footer of each page
-    |
-    */
-    'show_environment' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Menu bind to permission
-    |--------------------------------------------------------------------------
-    |
-    | whether enable menu bind to a permission
-    */
-    'menu_bind_permission' => true,
+    'exception_handler' => \Dcat\Admin\Exception\Handler::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -338,52 +353,6 @@ return [
     | Whether enable default breadcrumb for every page content.
     */
     'enable_default_breadcrumb' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Enable/Disable assets minify
-    |--------------------------------------------------------------------------
-    */
-    'minify_assets' => [
-
-        // Assets will not be minified.
-        'excepts' => [
-
-        ],
-
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Enable/Disable sidebar menu search
-    |--------------------------------------------------------------------------
-    */
-    'enable_menu_search' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Exclude route from generate menu command
-    |--------------------------------------------------------------------------
-    */
-    'menu_exclude' => [
-        '_handle_selectable_',
-        '_handle_renderable_',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Alert message that will displayed on top of the page.
-    |--------------------------------------------------------------------------
-    */
-    'top_alert' => '',
-
-    /*
-    |--------------------------------------------------------------------------
-    | The global Grid action display class.
-    |--------------------------------------------------------------------------
-    */
-    'grid_action_class' => \Encore\Admin\Grid\Displayers\DropdownActions::class,
-//  'grid_action_class' => \Encore\Admin\Grid\Displayers\ContextMenuActions::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -401,7 +370,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | You can find all available extensions here
-    | https://github.com/laravel-admin-extensions.
+    | https://github.com/dcat-admin-extensions.
     |
     */
     'extensions' => [

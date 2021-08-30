@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Dcat\Admin\Traits\HasDateTimeFormatter;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 class Printer extends Model
 {
@@ -25,9 +28,14 @@ class Printer extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function solutions()
+    public function solutions():BelongsToMany
     {
-        return $this->belongsToMany(Solution::class, 'binds', 'printers_id', 'solutions_id');
+        $pivotTable = 'binds'; // 中间表
+
+        $relatedModel = Solution::class; // 关联模型类名
+
+        return $this->belongsToMany($relatedModel, $pivotTable, 'printers_id', 'solutions_id');
+
     }
 
     public function binds()
