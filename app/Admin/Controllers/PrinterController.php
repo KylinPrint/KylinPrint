@@ -4,21 +4,21 @@ namespace App\Admin\Controllers;
 
 use App\Models\Printer;
 use App\Models\Brand;
-use Dcat\Admin\Controllers\AdminController;
+use Dcat\Admin\Http\Controllers\AdminController;
+use App\Admin\Repositories\Report;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Grid\Filter\Like;
 use Dcat\Admin\Grid\Displayers\ContextMenuActions;
 use Dcat\Admin\Show;
-use Dcat\Admin\Widgets\Table;
 use App\Admin\Actions\JumpInfo;
 use App\Models\Bind;
 use App\Models\Industry_Tag;
 use App\Models\Principle_Tag;
-use App\Models\Project_Tag;
-use App\Models\Printer_Type_Principle_Tag;
 use App\Models\Solution;
 use Illuminate\Database\Eloquent\Collection;
+
+use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
 
 class PrinterController extends AdminController
 {
@@ -36,10 +36,13 @@ class PrinterController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(Printer::with(['brands','solutions','binds']));
+        $grid = new Grid(Printer::with(['brands','solutions','binds','industry_tags','principle_tags','project_tags']));
         //$grid->fixColumns(3);   //冻结前三列
 
         $grid->setActionClass(ContextMenuActions::class);
+        $grid->showColumnSelector();
+        
+        $grid->export();
 
         $grid->quickSearch('model');    //快速搜索
        
@@ -131,22 +134,26 @@ class PrinterController extends AdminController
         $grid->column('binds',__('适配平台'))->display(function($binds){
             $Arr1 = array();
             $Arr2 = array();
-
-            foreach($binds as $value){
-                if ($Arr1==null){$Arr1 = $value['adapter'];}
-                else {$Arr1 = array_merge($Arr1,$value['adapter']);}
-            }
-           
-            foreach ($Arr1 as $value){
-                $a = 0;
-                foreach ($Arr2 as $value){
-                    if ($Arr2 == $value){$a++;}
+            if($binds[0]['adapter']){
+                foreach($binds as $value){
+                    if ($Arr1==null){$Arr1 = $value['adapter'];}
+                    else {$Arr1 = array_merge($Arr1,$value['adapter']);}
                 }
-                if ($a == 0){ $Arr2 = $Arr1;}
+               
+                foreach ($Arr1 as $value){
                     $a = 0;
+                    foreach ($Arr2 as $value){
+                        if ($Arr2 == $value){$a++;}
+                    }
+                    if ($a == 0){ $Arr2 = $Arr1;}
+                        $a = 0;
+                }
+                return $Arr2; 
             }
-            return $Arr2;
+            else return '';
+            
         })->label()->hide();
+        //判断条件待优化
 
         
         $grid->column('project_tags',__('涉及项目'))->pluck('name')->label();
@@ -168,12 +175,12 @@ class PrinterController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show($id, Printer::with(['brands','solutions','binds','industry_tags']));
+
+        $show = new Show($id, Printer::with(['brands','solutions','binds','industry_tags','principle_tags']));
 
         $show->field('brands.name', __('Brand'));
-        //$show->model(__('Model'));
-        $show->type(__('Printer Type'));
-
+        $show->field('model');
+        
         $show->field('industry_tags',__('应用行业'))->as(function($industry_tags){
             $IndustryArr = array();
             foreach($industry_tags as $value){$IndustryArr[] = $value['name'];}
@@ -185,29 +192,32 @@ class PrinterController extends AdminController
         $show->network(__('Network'));
         $show->duplex(__('Duplex'));
         $show->pagesize(__('Pagesize'));
-        //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
-        $show->binds(__('Solutions'), function ($binds) {
-            $binds->disableFilter();
-            $binds->disableExport();
-            $binds->disableCreateButton();
-            // $solutions->resource('/admin/comments');
-            $binds->column('solutions.name', __('Solution name'));
-            $binds->column('solutions.comment', __('Solution comment'));
-            $binds->checked(__('Checked'))->display(function ($checked) {
+        // //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
+        $show->binds(__('Solutions'), function ($model) {
+            $grid = new Grid(Bind::with(['printers','solutions']));
+
+            $grid->model()->where('printers_id', $model->id);
+            $grid->disableFilter();
+            //$grid->disableExport();
+            $grid->disableCreateButton();
+            $grid->setResource('/admin/comments');
+            $grid->column('solutions.name', __('Solution name'));
+            $grid->column('solutions.comment', __('Solution comment'));
+            $grid->checked(__('Checked'))->display(function ($checked) {
                 if     ($checked == '0') { return '未验证'; }
                 elseif ($checked == '1') { return '已验证'; }
                 else                     { return ''; };
             });
-            $binds->column('adapter',__('适配平台'))->label()->filter('like');
-            $binds->actions(function ($actions) {
+            $grid->column('adapter',__('适配平台'))->label()->filter('like');
+            $grid->actions(function ($actions) {
                 $actions->disableDelete();
                 $actions->disableEdit();     
                 $actions->disableView();
-                $actions->add(new JumpInfo($actions->row['id']));
+                $actions->append(new JumpInfo($actions->row['id']));
 
             });
 
-            return $binds;
+            return $grid;
         });
         return $show;
     }
@@ -219,90 +229,101 @@ class PrinterController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(Printer::with(['brands','solutions','binds']));
+        $form = new Form(Printer::with(['brands','solutions','binds','industry_tags']));
 
-        $states = [
-            'on'  => ['value' => 1, 'text' => '是', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => '否', 'color' => 'danger'],
-        ];
-
-        $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
-        $form->text('model', __('Model'));
-        $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
-
-        $form->multipleSelect('industry_tags',__('应用行业'))->options(Industry_Tag::all()->pluck('name', 'id'));
-        $form->select('principle_tags_id', __('打印机工作方式'))->options(Principle_Tag::all()->pluck('name', 'id'));
-        $form->date('release_date', __('Release date'));
-        $form->switch('onsale', __('Onsale'))->options($states);
-        $form->switch('network', __('Network'))->options($states);
-       
-        $form->select('duplex', __('Duplex'))->options([
-            'single' => __('Single'),
-            'manual' => __('Manual Duplex'),
-            'duplex' => __('Auto Duplex')
-        ]);
-        $form->text('pagesize', __('Pagesize'));
-
-        
-
-        
-        $form->multipleSelect('solutions',__('Solution name'))
-        ->options(Solution::all()->pluck('name', 'id'))
-        ->customFormat(function ($v) {
-            if (! $v) {
-                return [];
-            }
-
-            // 从数据库中查出的二维数组中转化成ID
-            return array_column($v, 'id');
-        });
-
-        $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
+        return Form::make(Printer::with(['brands','solutions','binds','industry_tags']), function (Form $form){
+            $states = [
+                'on'  => ['value' => 1, 'text' => '是', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => '否', 'color' => 'danger'],
+            ];
             
-            // $sid = $form->model()->solutions_id;
-            // if(1){};
-            // $sname = Solution::where('id',$sid)->pluck('name')->first();
-            //拿到一个空模型nm，这块考虑回调弹个表单
-            
-            //$form->multipleSelect('adapter',$sname)->options([
-            $form->multipleSelect('adapter')->options([
-                'v4_arm' => 'v4_arm','v4_amd' => 'v4_amd','v4_mips' => 'v4_mips',
-                'v7_arm' => 'v7_arm','v7_amd' => 'v7_amd','v7_mips' => 'v7_mips',
-                'v10_arm' => 'v10_arm','v10_amd' => 'v10_amd','v10_mips' => 'v10_mips',
-                'v10sp1_arm' => 'v10sp1_arm','v10sp1_amd' => 'v10sp1_amd','v10sp1_mips' => 'v10sp1_mips',
-                'v10sp1_loongarch' => 'v10sp1_loongarch'
-            ]);
-            $form->select('checked')->options([
-                0 => '未验证',1 => '已验证'
-            ]);        
-        })->disableDelete()->disableCreate();
-        
-
-        $form->hidden('adapter_status');
-
-        $form->saved(function (Form $form) {
-            if($form->isEditing()){
-                $id=request()->route()->parameters()['printer'];
-            }//获取当前实例id
-            $a = Bind::where('printe
-            rs_id', '=', $id)->select('id','checked')->get();
-            $count = count($a);
-            if($count == 0){$form->adapter_status = 0;}
-            else {
-                $b = 0;
-                foreach ($a as $value){
-                    if ($value['checked'] == 1) {$b++;}
+            $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
+            $form->text('model', __('Model'));
+            $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
+    
+            $form->multipleSelect('industry_tags',__('应用行业'))
+            ->options(Industry_Tag::all()->pluck('name', 'id'))
+            ->customFormat(function ($v) {
+                if (! $v) {
+                    return [];
                 }
-                if ($b == 0) {$form->adapter_status = 1;}
-                else $form->adapter_status = 2;
-            };
-        });            
+    
+                // 从数据库中查出的二维数组中转化成ID
+                return array_column($v, 'id');
+            });
+            $form->select('principle_tags_id', __('打印机工作方式'))->options(Principle_Tag::all()->pluck('name', 'id'));
+            $form->date('release_date', __('Release date'));
+            $form->switch('onsale', __('Onsale'))->options($states);
+            $form->switch('network', __('Network'))->options($states);
+           
+            $form->select('duplex', __('Duplex'))->options([
+                'single' => __('Single'),
+                'manual' => __('Manual Duplex'),
+                'duplex' => __('Auto Duplex')
+            ]);
+            $form->text('pagesize', __('Pagesize'));
+    
+            
+    
+            
+            $form->multipleSelect('solutions',__('Solution name'))
+            ->options(Solution::all()->pluck('name', 'id'))
+            ->customFormat(function ($v) {
+                if (! $v) {
+                    return [];
+                }
+                // 从数据库中查出的二维数组中转化成ID
+                return array_column($v, 'id');
+            });
+            if (!$form->isCreating()){
+                $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
+                
+                    $sid = $form->model()->solutions_id;
+                    $sname = Solution::where('id',$sid)->pluck('name')->first();
+                      
+                    $form->multipleSelect('adapter',$sname)->options([
+                        'v4_arm' => 'v4_arm','v4_amd' => 'v4_amd','v4_mips' => 'v4_mips',
+                        'v7_arm' => 'v7_arm','v7_amd' => 'v7_amd','v7_mips' => 'v7_mips',
+                        'v10_arm' => 'v10_arm','v10_amd' => 'v10_amd','v10_mips' => 'v10_mips',
+                        'v10sp1_arm' => 'v10sp1_arm','v10sp1_amd' => 'v10sp1_amd','v10sp1_mips' => 'v10sp1_mips',
+                        'v10sp1_loongarch' => 'v10sp1_loongarch'
+                    ]);
+                    $form->select('checked')->options([
+                        0 => '未验证',1 => '已验证'
+                    ]);        
+                })->disableDelete()->disableCreate();
+            }    
+    
+            $form->hidden('adapter_status');
 
-        $form->confirm('确定更新吗？', 'edit');
-        $form->confirm('确定创建吗？', 'create');
-        $form->confirm('确定提交吗？');
+            if (!$form->isCreating()){
+                $form->saving(function (Form $form) {
+                    if($form->isEditing()){
+                        $id = request()->route()->parameters()['printer'];
+                    }//获取当前实例id
+                    $a = Bind::where('printers_id', '=', $id)->select('id','checked')->get();
+                    $count = count($a);
+                    if($count == 0){$form->adapter_status = 0;}
+                    else {
+                        $b = 0;
+                        foreach ($a as $value){
+                            if ($value['checked'] == 1) {$b++;}
+                        }
+                        if ($b == 0) {$form->adapter_status = 1;}
+                        else $form->adapter_status = 2;
+                    };
+                }); 
+            }
+            else{$form->adapter_status = 0;}
+            //待优化
+                       
+    
+            $form->confirm('确定更新吗？', 'edit');
+            $form->confirm('确定创建吗？', 'create');
+            $form->confirm('确定提交吗？');
+        });       
 
         //TODO 解决方案
-        return $form;
+
     }
 }

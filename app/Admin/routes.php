@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Route;
+use Dcat\Admin\Admin;
 
 Admin::routes();
 
@@ -20,4 +22,5 @@ Route::group([
     $router->resource('files', FileController::class);
     $router->resource('tags', TagController::class);
     $router->resource('tag_binds', TagBindController::class);
+    $router->resource('project_tags', ProjectTagController::class);
 });

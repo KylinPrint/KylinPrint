@@ -62,6 +62,11 @@ class Printer extends Model
         return $this->belongsToMany(Project_Tag::class,'project_tag_binds', 'printers_id', 'project_tags_id');
     }
 
+    public function project_tag_binds()
+    {
+        return $this->hasMany(Project_Tag_Bind::class, 'printers_id');
+    }
+
     public function adapters()
     {
         return $this->hasManyThrough(Adapter::class,Bind::class,'printers_id','binds_id','id','id');

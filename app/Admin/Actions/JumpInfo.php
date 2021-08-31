@@ -2,7 +2,7 @@
 
 namespace App\Admin\Actions;
 
-use Dcat\Admin\Actions\RowAction;
+use Dcat\Admin\Grid\RowAction;
 use Illuminate\Database\Eloquent\Model;
 
 class JumpInfo extends RowAction
