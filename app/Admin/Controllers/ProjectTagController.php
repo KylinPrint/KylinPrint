@@ -45,8 +45,10 @@ class ProjectTagController extends AdminController
 
         $show->field('id');
         $show->field('name');
+
         
         $show->project_tag_binds(__('Printer'), function ($model) {
+            
             $grid = new Grid(Project_Tag_Bind::with(['printers','project_tags']));
 
             $grid->model()->where('project_tags_id', $model->id);
@@ -54,9 +56,16 @@ class ProjectTagController extends AdminController
             //$grid->disableExport();
             $grid->disableCreateButton();
             $grid->setResource('/admin/profile');
-            $grid->column('printers.name', __('Printers name'));  //没显示
-            $grid->column('project_tags.name', __('Printers comment'));
+            $grid->column('printers.model', __('Printers name'));  
+            $grid->column('project_tags.name', __('Project name'));
             $grid->column('note');
+
+            $grid->actions(function ($actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();     
+                $actions->disableView();
+                $actions->append('<a href=""><i class="fa fa-eye"></i></a>');
+            });
             
             return $grid;
         });
@@ -73,13 +82,26 @@ class ProjectTagController extends AdminController
      */
     protected function form()
     {
-        return Form::make(new Project_Tag(), function (Form $form) {
+        return Form::make(Project_Tag::with(['printers','project_tag_binds']), function (Form $form){
+            
             $form->display('id');
             $form->text('name');
-            $form->text('note');
 
-            $form->display('created_at');
-            $form->display('updated_at');
+            $form->hasMany('project_tag_binds', '涉及打印机', function (Form\NestedForm $form){
+
+                $form->text('printer_model', '打印机名')->disable()->customFormat(function ($v) {
+                    $a = $this->toArray();
+                    $b = Printer::where('id',$a['printers_id'])->pluck('model')->first();
+                    return $b;
+                });
+
+                $form->text('note');
+                        
+            })->disableDelete()->disableCreate()->useTable();
+
+            $form->confirm('确定更新吗？', 'edit');
+            $form->confirm('确定创建吗？', 'create');
+            $form->confirm('确定提交吗？');
         });
     }
 }

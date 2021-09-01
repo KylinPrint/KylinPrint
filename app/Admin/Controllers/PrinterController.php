@@ -229,7 +229,6 @@ class PrinterController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(Printer::with(['brands','solutions','binds','industry_tags']));
 
         return Form::make(Printer::with(['brands','solutions','binds','industry_tags']), function (Form $form){
             $states = [
@@ -277,11 +276,14 @@ class PrinterController extends AdminController
             });
             if (!$form->isCreating()){
                 $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
-                
-                    $sid = $form->model()->solutions_id;
-                    $sname = Solution::where('id',$sid)->pluck('name')->first();
+
+                    $form->text('solution_name', '解决方案名')->disable()->customFormat(function ($v) {
+                        $a = $this->toArray();
+                        $b = Solution::where('id',$a['solutions_id'])->pluck('name')->first();
+                        return $b;
+                    });
                       
-                    $form->multipleSelect('adapter',$sname)->options([
+                    $form->multipleSelect('adapter')->options([
                         'v4_arm' => 'v4_arm','v4_amd' => 'v4_amd','v4_mips' => 'v4_mips',
                         'v7_arm' => 'v7_arm','v7_amd' => 'v7_amd','v7_mips' => 'v7_mips',
                         'v10_arm' => 'v10_arm','v10_amd' => 'v10_amd','v10_mips' => 'v10_mips',
@@ -291,8 +293,8 @@ class PrinterController extends AdminController
                     $form->select('checked')->options([
                         0 => '未验证',1 => '已验证'
                     ]);        
-                })->disableDelete()->disableCreate();
-            }    
+                })->disableDelete()->disableCreate()->useTable();
+            }    //导致上个多选框删除时会出错
     
             $form->hidden('adapter_status');
 
