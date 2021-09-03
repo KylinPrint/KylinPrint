@@ -87,18 +87,20 @@ class ProjectTagController extends AdminController
             $form->display('id');
             $form->text('name');
 
-            $form->hasMany('project_tag_binds', '涉及打印机', function (Form\NestedForm $form){
+            if(!$form->isCreating()){
+                $form->hasMany('project_tag_binds', '涉及打印机', function (Form\NestedForm $form){
 
-                $form->text('printer_model', '打印机名')->disable()->customFormat(function ($v) {
-                    $a = $this->toArray();
-                    $b = Printer::where('id',$a['printers_id'])->pluck('model')->first();
-                    return $b;
-                });
-
-                $form->text('note');
-                        
-            })->disableDelete()->disableCreate()->useTable();
-
+                    $form->text('printer_model', '打印机名')->disable()->customFormat(function ($v) {
+                        $a = $this->toArray();
+                        $b = Printer::where('id',$a['printers_id'])->pluck('model')->first();
+                        return $b;
+                    });
+    
+                    $form->text('note');
+                            
+                })->disableDelete()->disableCreate()->useTable();
+            }
+            
             $form->confirm('确定更新吗？', 'edit');
             $form->confirm('确定创建吗？', 'create');
             $form->confirm('确定提交吗？');

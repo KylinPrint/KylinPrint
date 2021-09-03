@@ -8,14 +8,19 @@ use Dcat\Admin\Http\Controllers\AdminController;
 use App\Admin\Repositories\Report;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
+use App\Admin\Renderable\ProjectTable;
+use Dcat\Admin\Widgets\Modal;
+use Dcat\Admin\Layout\Content;
 use Dcat\Admin\Grid\Filter\Like;
 use Dcat\Admin\Grid\Displayers\ContextMenuActions;
 use Dcat\Admin\Show;
+use App\Admin\Actions\Modal\PrinterModal;
 use App\Admin\Actions\JumpInfo;
 use App\Models\Bind;
 use App\Models\Industry_Tag;
 use App\Models\Principle_Tag;
 use App\Models\Solution;
+use Dcat\Admin\Http\Auth\Permission;
 use Illuminate\Database\Eloquent\Collection;
 
 use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
@@ -28,6 +33,7 @@ class PrinterController extends AdminController
      * @var string
      */
     protected $title = '打印机';
+
 
     /**
      * Make a grid builder.
@@ -51,8 +57,14 @@ class PrinterController extends AdminController
             $filter->disableIdFilter();
         
             // 在这里添加字段过滤器
-            
+                       
         });
+
+        $grid->tools(function  (Grid\Tools  $tools)  { 
+            //Excel导入
+            $tools->append(new  PrinterModal());  
+        });
+
         $grid->selector(function (Grid\Tools\Selector $selector) {
             
             $selector->select('brands_id', __('Brand'), [
@@ -107,29 +119,37 @@ class PrinterController extends AdminController
         $grid->column('industry_tags',__('应用行业'))->pluck('name')->label();
         $grid->column('principle_tags.name', __('打印机工作方式'));
         $grid->column('release_date', __('Release date'));
-        $grid->column('onsale', __('Onsale'))->display(function ($onsale) {
+        $grid->column('onsale', __('在售'))->display(function ($onsale) {
             if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
             else                    { return ''; }
         });
-        $grid->column('network', __('Network'))->display(function ($network) {
+        $grid->column('network', __('网络功能'))->display(function ($network) {
             if     ($network == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($network == '1') { return '<i class="fa fa-check text-green"></i>'; }
             else                     { return ''; }
         })->hide();
-        $grid->column('duplex', __('Duplex'))->display(function ($duplex) {
+        $grid->column('duplex', __('双面'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
             elseif ($duplex == 'manual') { return '手动双面'; }
             elseif ($duplex == 'duplex') { return '自动双面'; }
             else { return ''; }
         })->hide();
-        $grid->column('pagesize', __('Pagesize'))->hide(); 
+        $grid->column('pagesize', __('最大幅面'))->hide(); 
 
         $grid->column('adapter_status','适配状态')->display(function ($adapter_status){
             if     ($adapter_status == 0)  { return '未适配'; }
             elseif ($adapter_status == 1) { return '未验证'; }
             elseif ($adapter_status == 2) { return '已验证'; }
-        });
+        })->dot(
+            [
+                0 => 'danger',
+                1 => 'primary',
+                2 => 'success',
+            ], 
+            'danger' // 默认值
+        );
+    
         
         $grid->column('binds',__('适配平台'))->display(function($binds){
             $Arr1 = array();
@@ -156,7 +176,15 @@ class PrinterController extends AdminController
         //判断条件待优化
 
         
-        $grid->column('project_tags',__('涉及项目'))->pluck('name')->label();
+        // $grid->column('project_tags',__('涉及项目'))->pluck('name')->label();
+
+        $grid->column('project_tags',__('涉及项目'))->display('详情')->modal(function ($modal) {
+            $modal->title('涉及项目');
+        
+            return ProjectTable::make(['title' => $this->title]);
+        });
+        
+
 
         $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
