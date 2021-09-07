@@ -22,6 +22,7 @@ use App\Models\Principle_Tag;
 use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
 use Illuminate\Database\Eloquent\Collection;
+use App\Admin\Extensions\Exporter\PrinterExporter;
 
 use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
 
@@ -48,7 +49,7 @@ class PrinterController extends AdminController
         $grid->setActionClass(ContextMenuActions::class);
         $grid->showColumnSelector();
         
-        $grid->export();
+        $grid->export(new PrinterExporter());
 
         $grid->quickSearch('model');    //快速搜索
        
@@ -158,6 +159,7 @@ class PrinterController extends AdminController
                 foreach($binds as $value){
                     if ($Arr1==null){$Arr1 = $value['adapter'];}
                     else {$Arr1 = array_merge($Arr1,$value['adapter']);}
+                    //数组合并，用+会覆盖，暂不清楚原因
                 }
                
                 foreach ($Arr1 as $value){
