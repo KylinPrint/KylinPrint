@@ -15,6 +15,9 @@ class CreateFilesTable extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->id();                       //附件ID
+            $table->bigInteger('parent_id')->default('0');
+                                                //父目录id
+            $table->string('title');            //行名称
             $table->string('path');             //附件路径
             $table->foreignId('solutions_id')
                 ->constrained()

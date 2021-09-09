@@ -32,6 +32,7 @@ class CreatePrintersTable extends Migration
             $table->enum('duplex', ['single', 'manual', 'duplex'])
                 ->nullable();                                       //双面
             $table->string('pagesize')->nullable();                 //最大处理幅面
+            $table->string('adapter_status ')->nullable();          //适配状态
             $table->timestamps();
         });
     }
