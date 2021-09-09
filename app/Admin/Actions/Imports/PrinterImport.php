@@ -15,7 +15,7 @@ class PrinterImport implements ToModel, WithStartRow
      */
     public function model(array $row)
     {
-
+        
         $brands_id = Printer::where('brands_id', '=', $row[0])->first();
         if ($brands_id) {
             return null;

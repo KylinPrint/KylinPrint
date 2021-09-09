@@ -15,6 +15,8 @@ Route::group([
 
     $router->get('/', 'HomeController@index')->name('home');
 
+    $router->redirect('/admin/upload', '/upload');
+    
     $router->resource('printers', PrinterController::class);
     $router->resource('brands', BrandController::class);
     $router->resource('manufactors', ManufactorController::class);
