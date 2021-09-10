@@ -23,7 +23,7 @@ class CreateBindsTable extends Migration
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->string('adapter')->unique();
+            $table->string('adapter')->constrained()->unique();
             $table->smallInteger('checked')->default(0);
             $table->primary(['printers_id', 'solutions_id']);
             $table->timestamps();
