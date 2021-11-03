@@ -12,6 +12,7 @@ use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use Dcat\Admin\FormStep\Form as StepForm;
 use Dcat\Admin\Widgets\Alert;
+use Dcat\Admin\Admin;
 
 class FileController extends AdminController
 {
@@ -41,6 +42,18 @@ class FileController extends AdminController
     protected function grid()
     {
         $grid = new Grid(File::with(['solutions']));
+
+        if(!Admin::user()->can('create-files')){
+            $grid->disableCreateButton();
+        }
+
+        if(!Admin::user()->can('edit-files')){
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();
+                $actions->disableQuickEdit();
+            });
+        }
 
         $grid->column('id', __('ID'))->hide();
         $grid->column('solutions.name', __('Solution'));
@@ -125,7 +138,7 @@ class FileController extends AdminController
         // $ppath = File::where('id',$pid)->pluck('path')->first();
 
         // $form->file('path')->disk('admin')->move($ppath);
-        // //怎么实现在form post时上传文件？¿？¿
+        //怎么实现在form post时上传文件？¿？¿
 
         // $form->select('solutions_id',__('Solution name'))->options(Solution::all()->pluck('name', 'id'));
 

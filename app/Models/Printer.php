@@ -16,11 +16,15 @@ class Printer extends Model
         'brands_id',
         'model',
         'type',
+        'principle_tags_id',
         'release_date',
         'onsale',
         'network',
         'duplex',
-        'pagesize'
+        'pagesize',
+        'mainstream',
+        'language',
+        'adapter_status',
     ];
 
     public function brands()

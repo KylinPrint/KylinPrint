@@ -8,6 +8,7 @@ use Dcat\Admin\Http\Controllers\AdminController;
 use App\Admin\Repositories\Report;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
+use Dcat\Admin\Admin;
 use App\Admin\Renderable\ProjectTable;
 use Dcat\Admin\Widgets\Modal;
 use Dcat\Admin\Layout\Content;
@@ -48,6 +49,9 @@ class PrinterController extends AdminController
 
         $grid->setActionClass(ContextMenuActions::class);
         $grid->showColumnSelector();
+        if(!Admin::user()->can('create-printers')){
+            $grid->disableCreateButton();
+        }
         
         $grid->export(new PrinterExporter());
 
@@ -61,16 +65,21 @@ class PrinterController extends AdminController
                        
         });
 
-        $grid->tools(function  (Grid\Tools  $tools)  { 
-            //Excel导入
-            $tools->append(new  PrinterModal());  
-        });
+        if(Admin::user()->can('edit-printers')){
+            $grid->tools(function  (Grid\Tools  $tools)  { 
+                //Excel导入
+                $tools->append(new  PrinterModal());  
+            });
+        }
+        
 
         $grid->selector(function (Grid\Tools\Selector $selector) {
             
             $selector->select('brands_id', __('Brand'), [
-                2 => 'HP',
-                1 => 'Canon'
+                149 => '立象',156 => '兄弟',157 => '佳能',165 => '得实',170 => '爱普生',
+                173 => '富士施乐',174 => '富士通',175 => '佳博',187 => '惠普',195 => '柯尼卡美能达',
+                196 => '京瓷',199 => '联想',200 => '利盟',203 => '南天',217 => '理光',
+                222 => '三星',225 => '夏普',234 => '光电通',235 => '东芝',236 => '天津国聚',
             ]);
             $selector->select('onsale', __('Onsale'), [
                 1 => '在售',
@@ -84,7 +93,7 @@ class PrinterController extends AdminController
             ]);
 
             $selector->selectOne('sys','适配系统',[
-                'v4' => 'v4','v7' => 'v7','v10' => 'v10','v10sp1' => 'v10sp1'
+                'V4' => 'V4','V7' => 'V7','V10' => 'V10','V10SP1' => 'V10SP1'
             ],function($query,$value){
                 $this->a = $value;
                 $query->whereHas('binds', function ($query) {
@@ -95,7 +104,7 @@ class PrinterController extends AdminController
             });
             
             $selector->selectOne('frome','适配架构',[
-                'amd' => 'amd','arm' => 'arm','mips' => 'mips','loongarch' => 'loongarch'
+                'AMD' => 'AMD','ARM' => 'ARM','MIPS' => 'MIPS','LoongAarch' => 'LoongAarch'
             ],function($query,$value){
                 $this->b = $value;
                 $query->whereHas('binds', function ($query) {
@@ -123,12 +132,12 @@ class PrinterController extends AdminController
         $grid->column('onsale', __('在售'))->display(function ($onsale) {
             if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
-            else                    { return ''; }
+            else                    { return '<i class="fa fa-clock-o text-black"></i>'; }
         });
         $grid->column('network', __('网络功能'))->display(function ($network) {
             if     ($network == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($network == '1') { return '<i class="fa fa-check text-green"></i>'; }
-            else                     { return ''; }
+            else                     { return '<i class="fa fa-clock-o text-black"></i>'; }
         })->hide();
         $grid->column('duplex', __('双面'))->display(function ($duplex) {
             if     ($duplex == 'single') { return '单面'; }
@@ -151,11 +160,11 @@ class PrinterController extends AdminController
             'danger' // 默认值
         );
     
-        
+        //TODO 需加空验证
         $grid->column('binds',__('适配平台'))->display(function($binds){
             $Arr1 = array();
             $Arr2 = array();
-            if($binds[0]['adapter']){
+            if(!isset($binds[0])){
                 foreach($binds as $value){
                     if ($Arr1==null){$Arr1 = $value['adapter'];}
                     else {$Arr1 = array_merge($Arr1,$value['adapter']);}
@@ -191,6 +200,8 @@ class PrinterController extends AdminController
         $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
         $grid->column('created_at')->hide();
+        $updateArr = array(); //TODO 取最新更新时间，多对多怎么取
+
         $grid->column('updated_at')->hide();
         
 
@@ -207,6 +218,14 @@ class PrinterController extends AdminController
     {
 
         $show = new Show($id, Printer::with(['brands','solutions','binds','industry_tags','principle_tags']));
+
+        if(!Admin::user()->can('edit-printers')){
+            $show->panel()->tools(function ($tools) 
+            {
+                $tools->disableEdit();
+                $tools->disableDelete();
+            });    
+        }
 
         $show->field('brands.name', __('Brand'));
         $show->field('model');
@@ -238,7 +257,7 @@ class PrinterController extends AdminController
                 elseif ($checked == '1') { return '已验证'; }
                 else                     { return ''; };
             });
-            $grid->column('adapter',__('适配平台'))->label()->filter('like');
+            $grid->column('adapter',__('适配平台'))->label();
             $grid->actions(function ($actions) {
                 $actions->disableDelete();
                 $actions->disableEdit();     

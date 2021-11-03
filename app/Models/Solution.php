@@ -18,7 +18,8 @@ class Solution extends Model
         'amd64',
         'arm64',
         'mips64el',
-        'loongarch64'
+        'loongarch64',
+        'detail',
     ];
 
     public function printers()

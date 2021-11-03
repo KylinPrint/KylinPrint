@@ -47,6 +47,6 @@ class Bind extends Model
         if (is_array($adapter)){
             $this->attributes['adapter'] = trim(implode(',',$adapter), ',');
         }
-        
+        else $this->attributes['adapter'] = $adapter;
     } //存adapter转成字符串
 }

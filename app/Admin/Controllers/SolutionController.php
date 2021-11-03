@@ -7,6 +7,7 @@ use Dcat\Admin\Http\Controllers\AdminController;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
+use Dcat\Admin\Admin;
 
 class SolutionController extends AdminController
 {
@@ -25,6 +26,18 @@ class SolutionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Solution());
+
+        if(!Admin::user()->can('create-solutions')){
+            $grid->disableCreateButton();
+        }
+
+        if(!Admin::user()->can('edit-solutions')){
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();
+                $actions->disableQuickEdit();
+            });
+        }
 
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('source', __('解决方案来源'), [
@@ -56,6 +69,14 @@ class SolutionController extends AdminController
     protected function detail($id)
     {
         $show = new Show(Solution::findOrFail($id));
+
+        if(!Admin::user()->can('edit-solutions')){
+            $show->panel()->tools(function ($tools) 
+            {
+                $tools->disableEdit();
+                $tools->disableDelete();
+            });    
+        }
 
         $show->field('id', __('ID'));
         $show->field('name', __('Solution name'));

@@ -53,3 +53,7 @@ $response = tap($kernel->handle(
 ))->send();
 
 $kernel->terminate($request, $response);
+
+$seconds = 0;
+
+set_time_limit($seconds);

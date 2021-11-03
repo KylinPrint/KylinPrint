@@ -9,6 +9,7 @@ use Dcat\Admin\Http\Controllers\AdminController;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
+use Dcat\Admin\Admin;
 
 class ProjectTagController extends AdminController
 {
@@ -20,6 +21,19 @@ class ProjectTagController extends AdminController
     protected function grid()
     {
         return Grid::make(new Project_Tag(['printers','project_tag_binds']), function (Grid $grid) {
+
+            if(!Admin::user()->can('create-projects')){
+                $grid->disableCreateButton();
+            }
+    
+            if(!Admin::user()->can('edit-projects')){
+                $grid->actions(function (Grid\Displayers\Actions $actions) {
+                    $actions->disableDelete();
+                    $actions->disableEdit();
+                    $actions->disableQuickEdit();
+                });
+            }
+
             $grid->column('id')->sortable();
             $grid->column('name');
             $grid->column('created_at');
@@ -42,6 +56,14 @@ class ProjectTagController extends AdminController
     protected function detail($id)
     {
         $show = new Show($id, Project_Tag::with(['printers','project_tag_binds']));
+
+        if(!Admin::user()->can('edit-projects')){
+            $show->panel()->tools(function ($tools) 
+            {
+                $tools->disableEdit();
+                $tools->disableDelete();
+            });    
+        }
 
         $show->field('id');
         $show->field('name');
