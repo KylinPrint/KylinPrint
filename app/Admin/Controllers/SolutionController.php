@@ -3,10 +3,11 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Solution;
-use Encore\Admin\Controllers\AdminController;
-use Encore\Admin\Form;
-use Encore\Admin\Grid;
-use Encore\Admin\Show;
+use Dcat\Admin\Http\Controllers\AdminController;
+use Dcat\Admin\Form;
+use Dcat\Admin\Grid;
+use Dcat\Admin\Show;
+use Dcat\Admin\Admin;
 
 class SolutionController extends AdminController
 {
@@ -25,6 +26,27 @@ class SolutionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Solution());
+
+        if(!Admin::user()->can('create-solutions')){
+            $grid->disableCreateButton();
+        }
+
+        if(!Admin::user()->can('edit-solutions')){
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();
+                $actions->disableQuickEdit();
+            });
+        }
+
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('source', __('解决方案来源'), [
+                1 => 'HP',
+                2 => 'Canon',
+                3 => 'Kylin'
+            ]);
+            
+        }); 
 
         $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Solution name'));
@@ -48,10 +70,21 @@ class SolutionController extends AdminController
     {
         $show = new Show(Solution::findOrFail($id));
 
+        if(!Admin::user()->can('edit-solutions')){
+            $show->panel()->tools(function ($tools) 
+            {
+                $tools->disableEdit();
+                $tools->disableDelete();
+            });    
+        }
+
         $show->field('id', __('ID'));
         $show->field('name', __('Solution name'));
         $show->field('comment', __('Solution comment'));
         $show->field('source', __('Solution source'));
+        $show->detail()->unescape()->as(function($detail){ 
+            return $detail;
+        });
 
         return $show;
     }
@@ -68,6 +101,7 @@ class SolutionController extends AdminController
         $form->text('name', __('Solution name'));
         $form->text('comment', __('Solution comment'));
         $form->text('source', __('Solution source'));
+        $form->editor('detail');
 
         return $form;
     }

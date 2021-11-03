@@ -4,10 +4,10 @@ namespace App\Admin\Controllers;
 
 use App\Models\Brand;
 use App\Models\Manufactor;
-use Encore\Admin\Controllers\AdminController;
-use Encore\Admin\Form;
-use Encore\Admin\Grid;
-use Encore\Admin\Show;
+use Dcat\Admin\Http\Controllers\AdminController;
+use Dcat\Admin\Form;
+use Dcat\Admin\Grid;
+use Dcat\Admin\Show;
 
 class BrandController extends AdminController
 {
@@ -25,7 +25,7 @@ class BrandController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new Brand());
+        $grid = new Grid(Brand::with(['manufactors','printers']));
 
         $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Brand name'));
@@ -45,7 +45,7 @@ class BrandController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Brand::findOrFail($id));
+        $show = new Show($id, Brand::with(['manufactors','printers']));
 
         $show->field('id', __('ID'));
         $show->field('name', __('Brand name'));
@@ -62,7 +62,7 @@ class BrandController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new Brand());
+        $form = new Form(Brand::with(['manufactors','printers']));
 
         $form->text('name', __('Brand name'));
         $form->text('name_en', __('Brand name en'));
