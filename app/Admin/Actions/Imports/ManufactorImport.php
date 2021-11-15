@@ -42,12 +42,12 @@ class ManufactorImport implements ToModel, WithStartRow, WithBatchInserts, WithC
 
     public function batchSize(): int
     {
-        return 1;
+        return 100;
     }
     //以1000条数据基准切割数据
     public function chunkSize(): int
     {
-        return 1;
+        return 100;
     }
 
 

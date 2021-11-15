@@ -12,7 +12,7 @@ use Dcat\Admin\Widgets\Form;
 use Maatwebsite\Excel\Facades\Excel;
 
 ini_set('max_execution_time', 600);
-ini_set('upload_max_filesize', '8M');
+ini_set('upload_max_filesize', '10M');
 
 class PrinterForm extends Form
 {
@@ -22,10 +22,10 @@ class PrinterForm extends Form
             //上传文件位置，这里默认是在storage中，如有修改请对应替换
             $file = storage_path('app/public/' . $input['file']);
 
-            // Excel::import(new ManufactorImport(time()),$file);
-            // Excel::import(new BrandImport(),$file);
-            // Excel::import(new PrinterImport(),$file);
-            // Excel::import(new SolutionImport(),$file);
+            Excel::import(new ManufactorImport(),$file);
+            Excel::import(new BrandImport(),$file);
+            Excel::import(new PrinterImport(),$file);
+            Excel::import(new SolutionImport(),$file);
             Excel::import(new BindImport(),$file);
             
             return $this->response()->success('数据导入成功')->refresh();

@@ -15,7 +15,9 @@ class Bind extends Model
         'printers_id',
         'solutions_id',
         'adapter',
-        'checked'
+        'checked',
+        'created_at',
+        'updated_at'
     ];
 
     public function printers()
@@ -34,6 +36,7 @@ class Bind extends Model
         return $this->hasMany(Adapter::class, 'adapters_id');
     }
 
+    //拿adapter转成数组
     public function getAdapterAttribute($adapter)
     {
         if (is_string($adapter)) {
@@ -41,12 +44,14 @@ class Bind extends Model
         }
 
         return $adapter;
-    } //拿adapter转成数组
+    } 
 
+    //存adapter转成字符串
     public function setAdapterAttribute($adapter) {
         if (is_array($adapter)){
             $this->attributes['adapter'] = trim(implode(',',$adapter), ',');
         }
+        //TODO 需添加字符串格式判断
         else $this->attributes['adapter'] = $adapter;
-    } //存adapter转成字符串
+    } 
 }

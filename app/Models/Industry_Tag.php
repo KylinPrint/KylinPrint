@@ -12,7 +12,9 @@ class Industry_Tag extends Model
     protected $table = 'industry_tags';
 
     protected $fillable = [
-        'name'
+        'name',
+        'created_at',
+        'updated_at'
     ];
 
     public function printers()
@@ -22,6 +24,6 @@ class Industry_Tag extends Model
 
     public function industry_tag_binds()
     {
-        return $this->hasMany(Industry_Tag_Bind::class, 'industry_tags_id');
+        return $this->hasMany(IndustryTagBind::class, 'industry_tags_id');
     }
 }

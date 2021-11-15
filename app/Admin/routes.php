@@ -25,4 +25,5 @@ Route::group([
     $router->resource('tags', TagController::class);
     $router->resource('tag_binds', TagBindController::class);
     $router->resource('project_tags', ProjectTagController::class);
+    $router->resource('solution_matches', SolutionMatchController::class);
 });
