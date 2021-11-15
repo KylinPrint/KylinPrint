@@ -24,6 +24,8 @@ use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
 use Illuminate\Database\Eloquent\Collection;
 use App\Admin\Extensions\Exporter\PrinterExporter;
+use App\Models\Industry_Tag_Bind;
+use App\Models\Project_Tag_Bind;
 
 use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
 
@@ -68,7 +70,7 @@ class PrinterController extends AdminController
         if(Admin::user()->can('edit-printers')){
             $grid->tools(function  (Grid\Tools  $tools)  { 
                 //Excel导入
-                $tools->append(new  PrinterModal());  
+                $tools->append(new PrinterModal()); 
             });
         }
         
@@ -92,19 +94,21 @@ class PrinterController extends AdminController
                 2 => '已验证'
             ]);
 
+            //TODO 查V10会把V10SP1也输出
             $selector->selectOne('sys','适配系统',[
-                'V4' => 'V4','V7' => 'V7','V10' => 'V10','V10SP1' => 'V10SP1'
+                'V4_' => 'V4','V7_' => 'V7','V10_' => 'V10','V10SP1_' => 'V10SP1'
             ],function($query,$value){
                 $this->a = $value;
                 $query->whereHas('binds', function ($query) {
                     
                         $query->where('adapter', 'like', "%{$this->a}%");
+                        $curQuery = $query;
                       
-                });                 
+                });
             });
             
             $selector->selectOne('frome','适配架构',[
-                'AMD' => 'AMD','ARM' => 'ARM','MIPS' => 'MIPS','LoongAarch' => 'LoongAarch'
+                '_X86' => 'X86','_ARM' => 'ARM','_MIPS' => 'MIPS','_LoongAarch' => 'LoongAarch'
             ],function($query,$value){
                 $this->b = $value;
                 $query->whereHas('binds', function ($query) {
@@ -113,7 +117,7 @@ class PrinterController extends AdminController
             });
                     
         }); //表头过滤
-
+        
         $grid->column('id', __('ID'))->sortable()->hide();
 
         //TODO 一排序就炸
@@ -196,11 +200,51 @@ class PrinterController extends AdminController
         });
         
 
-
         $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
         $grid->column('created_at')->hide();
-        $updateArr = array(); //TODO 取最新更新时间，多对多怎么取
+
+        //包括关联表的更新时间取最新
+        $grid->column('update')->display(function(){
+            $id = $this->id;
+        
+        $CurBindUpDate_AT_Exist = Bind::where("printers_id",$id)->exists();
+        $CurIndustryUpDate_AT_Exist = Industry_Tag_Bind::where("printers_id",$id)->exists();
+        $CurProjectUpDate_AT_Exist = Project_Tag_Bind::where("printers_id",$id)->exists();
+    
+        $UpdateArr = array();
+    
+        $UpdateArr[] = Printer::where("id",$id)->pluck('updated_at')->first()->timestamp;
+    
+        if($CurBindUpDate_AT_Exist)
+        {
+            $CurBindUpDate_AT = Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurBindUpDate_AT as $value)
+            {
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+    
+        if($CurIndustryUpDate_AT_Exist)
+        {
+            $CurIndustryUpDate_AT = Industry_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurIndustryUpDate_AT as $value)
+            {
+                $a = $value;
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+        if($CurProjectUpDate_AT_Exist)
+        {
+            $CurProjectUpDate_AT = Project_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurProjectUpDate_AT as $value)
+            {
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+        
+        return date("Y-m-d H:i",max($UpdateArr));
+        });
 
         $grid->column('updated_at')->hide();
         
@@ -288,7 +332,8 @@ class PrinterController extends AdminController
             $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
             $form->text('model', __('Model'));
             $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
-    
+            
+
             $form->multipleSelect('industry_tags',__('应用行业'))
             ->options(Industry_Tag::all()->pluck('name', 'id'))
             ->customFormat(function ($v) {
@@ -311,18 +356,19 @@ class PrinterController extends AdminController
             ]);
             $form->text('pagesize', __('Pagesize'));
     
-            
-    
-            
+            //TODO 当solution删除时不删除对应bind而是将solution_id删除，待改
             $form->multipleSelect('solutions',__('Solution name'))
             ->options(Solution::all()->pluck('name', 'id'))
             ->customFormat(function ($v) {
                 if (! $v) {
                     return [];
                 }
+
                 // 从数据库中查出的二维数组中转化成ID
                 return array_column($v, 'id');
             });
+
+            //TODO 导致上个多选框删除时只删除bind中solution_id字段，原因未明,与上同一个问题
             if (!$form->isCreating()){
                 $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
 
@@ -333,17 +379,17 @@ class PrinterController extends AdminController
                     });
                       
                     $form->multipleSelect('adapter')->options([
-                        'v4_arm' => 'v4_arm','v4_amd' => 'v4_amd','v4_mips' => 'v4_mips',
-                        'v7_arm' => 'v7_arm','v7_amd' => 'v7_amd','v7_mips' => 'v7_mips',
-                        'v10_arm' => 'v10_arm','v10_amd' => 'v10_amd','v10_mips' => 'v10_mips',
-                        'v10sp1_arm' => 'v10sp1_arm','v10sp1_amd' => 'v10sp1_amd','v10sp1_mips' => 'v10sp1_mips',
-                        'v10sp1_loongarch' => 'v10sp1_loongarch'
+                        'V4_ARM' => 'V4_ARM','V4_X86' => 'V4_X86','V4_MIPS' => 'V4_MIPS',
+                        'V7_ARM' => 'V7_ARM','V7_X86' => 'V7_X86','V7_MIPS' => 'V7_MIPS',
+                        'V10_ARM' => 'V10_ARM','V10_X86' => 'V10_X86','V10_MIPS' => 'V10_MIPS',
+                        'V10SP1_ARM' => 'V10SP1_ARM','V10SP1_X86' => 'V10SP1_X86','V10SP1_MIPS' => 'V10SP1_MIPS',
+                        'V10SP1_LoongArch' => 'V10SP1_LoongArch'
                     ]);
                     $form->select('checked')->options([
                         0 => '未验证',1 => '已验证'
                     ]);        
                 })->disableDelete()->disableCreate()->useTable();
-            }    //导致上个多选框删除时会出错
+            }    
     
             $form->hidden('adapter_status');
 
@@ -377,4 +423,47 @@ class PrinterController extends AdminController
         //TODO 解决方案
 
     }
+
+    public function UpdateFilter($request){
+        $id = $request->id;
+        
+        $CurBindUpDate_AT_Exist = Bind::where("printers_id",$id)->exists();
+        $CurIndustryUpDate_AT_Exist = Industry_Tag_Bind::where("printers_id",$id)->exists();
+        $CurProjectUpDate_AT_Exist = Project_Tag_Bind::where("printers_id",$id)->exists();
+    
+        $UpdateArr = array();
+    
+        $UpdateArr[] = Printer::where("id",$id)->pluck('updated_at')->first()->timestamp;
+    
+        if($CurBindUpDate_AT_Exist)
+        {
+            $CurBindUpDate_AT = Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurBindUpDate_AT as $value)
+            {
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+    
+        if($CurIndustryUpDate_AT_Exist)
+        {
+            $CurIndustryUpDate_AT = Industry_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurIndustryUpDate_AT as $value)
+            {
+                $a = $value;
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+        if($CurProjectUpDate_AT_Exist)
+        {
+            $CurProjectUpDate_AT = Project_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
+            foreach ($CurProjectUpDate_AT as $value)
+            {
+                array_push($UpdateArr,($value->timestamp));
+            }
+        }
+        
+        return date("Y-m-d H:i",max($UpdateArr));
+    
+    }
 }
+

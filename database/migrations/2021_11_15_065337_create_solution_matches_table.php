@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProjectTagsTable extends Migration
+class CreateSolutionMatchesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateProjectTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('project_tags', function (Blueprint $table) {
+        Schema::create('solution_matches', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('title');            //行名称
+            $table->string('path');             //附件路径
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ class CreateProjectTagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_tags');
+        Schema::dropIfExists('solution_matches');
     }
 }

@@ -31,14 +31,19 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
         $curSolutionId = Solution::where('name',$row['解决方案名'])->pluck('id')->first();
 
         $curBindId = Bind::where('printers_id',$curPrinterId)->pluck('id'); //当前printer_id在bind中的id
+
+        $curBindAdapter = $row['适配'];
         
         if(isset($curBindId))
         {
+            //TODO 需添加判断adapter是否相同
             foreach($curBindId as $value1)
             {
                 $curBindSId = Bind::where('id',$value1)->pluck('solutions_id')->first();
                 if($curBindSId == $curSolutionId)
-                {
+                {   
+                    $curAdapter = Bind::where('id',$value1)->pluck('adapter')->first();
+                    
                     return null;
                 }
             }
@@ -47,7 +52,7 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
         return new Bind([
                 'printers_id' => $curPrinterId,   
                 'solutions_id' => $curSolutionId,
-                'adapter' => $row['适配']
+                'adapter' => $curBindAdapter
         ]);
 
     }

@@ -32,14 +32,13 @@ class Printer extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function solutions():BelongsToMany
+    public function solutions()
     {
         $pivotTable = 'binds'; // 中间表
 
         $relatedModel = Solution::class; // 关联模型类名
 
-        return $this->belongsToMany($relatedModel, $pivotTable, 'printers_id', 'solutions_id');
-
+        return $this->belongsToMany($relatedModel, $pivotTable, 'printers_id', 'solutions_id')->withTimestamps();
     }
 
     public function binds()
@@ -48,7 +47,7 @@ class Printer extends Model
     }
     public function industry_tags()
     {
-        return $this->belongsToMany(Industry_Tag::class,'industry_tag_binds', 'printers_id', 'industry_tags_id');
+        return $this->belongsToMany(Industry_Tag::class,'industry_tag_binds', 'printers_id', 'industry_tags_id')->withTimestamps();
     }
 
     public function industry_tag_binds()

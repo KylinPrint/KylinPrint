@@ -17,11 +17,12 @@ class CreateIndustryTagBindsTable extends Migration
             $table->foreignId('printers_id')
                 ->constrained()
                 ->onUpdate('cascade')
-                ->onDelete('cascade');;
+                ->onDelete('cascade');
             $table->foreignId('industry_tags_id')
                 ->constrained()
                 ->onUpdate('cascade')
-                ->onDelete('cascade');;
+                ->onDelete('cascade');
+                $table->primary(['printers_id', 'industry_tags_id']);
             $table->timestamps();
         });
     }
