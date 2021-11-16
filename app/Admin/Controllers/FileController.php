@@ -132,7 +132,7 @@ class FileController extends AdminController
 
 
         // $form->file('path')->disk('admin');
-        $form->select('parent_id','父目录')->options(File::where('parent_id','0')->pluck('path','id'));
+        // $form->select('parent_id','父目录')->options(File::where('parent_id','0')->pluck('path','id'));
 
         $pid = request()->input('parent_id');
 
