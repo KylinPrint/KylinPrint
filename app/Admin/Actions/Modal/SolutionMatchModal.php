@@ -26,7 +26,7 @@ class SolutionMatchModal extends AbstractTool
 
         return <<<HTML
 <span class="grid-expand" data-toggle="modal" data-target="#{$id}">
-   <a href="javascript:void(0)"><button class="btn btn-outline-info ">Solution匹配</button></a>
+   <a href="javascript:void(0)"><button class="btn btn-outline-info ">导入适配需求</button></a>
 </span>
 HTML;
     }
