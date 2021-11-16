@@ -59,12 +59,13 @@ class SolutionMatchForm extends Form
         $curMatchArr = array();
         $curMatchArr[0] = 
         [
-            '型号' => '型号',
             '厂商' => '厂商',
+            '型号' => '型号',
             '系统版本' => '系统版本',
             '系统架构' => '系统架构',
             '解决方案名' => '解决方案名',
             '解决方案详情' => '解决方案详情',
+            '适配状态' => '适配状态'
         ];
         $i = 1;
 
@@ -72,12 +73,13 @@ class SolutionMatchForm extends Form
         {   
             $curMatchArr[$i] = 
             [
-                '型号' => $curImport['型号'],
                 '厂商' => $curImport['厂商'],
+                '型号' => $curImport['型号'],
                 '系统版本' => $curImport['系统版本'],
                 '系统架构' => $curImport['系统架构'],
                 '解决方案名' => '暂无适配方案',
-                '解决方案详情' => null
+                '解决方案详情' => null,
+                '适配状态' => '未适配',
             ];
             $curPrinterIdArr = Printer::where('model','like',$curImport['型号'])->pluck('id');
             
@@ -123,6 +125,8 @@ class SolutionMatchForm extends Form
                         {
                             if($curAdapter == $value)
                             {
+                                if(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 1){$curMatchArr[$i]['适配状态'] = '已验证';}
+                                elseif(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 2){$curMatchArr[$i]['适配状态'] = '待验证';}
                                 if($curMatchArr[$i]['解决方案名'] == '暂无适配方案')
                                 {
                                     $curMatchArr[$i]['解决方案名'] = $curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();
