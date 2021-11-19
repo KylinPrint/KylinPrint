@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class JumpInfo extends RowAction
 {
-    public $name = '详情';
+    public function title()
+
+    {
+        return '详情';
+    }
 
     public function handle(Model $model)
     {

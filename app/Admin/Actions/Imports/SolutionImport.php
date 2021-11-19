@@ -25,7 +25,7 @@ class SolutionImport implements ToModel, WithStartRow, WithBatchInserts, WithChu
     public function model(array $row)
     {
         
-        $curSolutionModel = Solution::where('name','=', $row['解决方案名'])->first(); //
+        $curSolutionModel = Solution::where('name','=', $row['解决方案名'])->first(); 
 
         //$curDetail = '<p><a href="'.$row['url'].'" target="_blank" rel="noopener">'.$row['url'].'</a></p>';
 
