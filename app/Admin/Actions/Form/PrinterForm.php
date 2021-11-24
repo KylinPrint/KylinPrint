@@ -9,6 +9,7 @@ use App\Admin\Actions\Imports\BrandImport;
 use App\Admin\Actions\Imports\ManufactorImport;
 use App\Models\Solution;
 use Dcat\Admin\Widgets\Form;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 ini_set('max_execution_time', 600);
@@ -27,6 +28,9 @@ class PrinterForm extends Form
             Excel::import(new PrinterImport(),$file);
             Excel::import(new SolutionImport(),$file);
             Excel::import(new BindImport(),$file);
+
+            $disk = Storage::disk('local');
+            $disk -> delete('public'.$input['file']);
             
             return $this->response()->success('数据导入成功')->refresh();
         } catch (\Exception $e) {

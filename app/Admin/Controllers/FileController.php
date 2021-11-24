@@ -13,6 +13,7 @@ use Dcat\Admin\Show;
 use Dcat\Admin\FormStep\Form as StepForm;
 use Dcat\Admin\Widgets\Alert;
 use Dcat\Admin\Admin;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends AdminController
 {
@@ -64,9 +65,9 @@ class FileController extends AdminController
             $actions->disableView();
 
             $rowArray = $actions->row->toArray();
-            //if($rowArray['parent_id']){
+            if($rowArray['parent_id']){
                 $actions->append(new FileDownload());
-            //}
+            }
             
         });
         
@@ -109,39 +110,47 @@ class FileController extends AdminController
         //             ->options(File::where('parent_id','0')
         //             ->pluck('path','id'))
         //             ->required();
-        //         // h5 表单验证
+
         //         $step->select('solutions_id',__('Solution name'))
         //             ->options(Solution::all()
         //             ->pluck('name', 'id'))
         //             ->required();
 
         //     })->add('文件上传', function (\Dcat\Admin\FormStep\Form $step) {
-        //         $a = session()->all();
-        //         $ppath = '';
-        //         foreach($a as $value){
+        //         $curSession = session()->all();
+        //         $ppath = '/';
+        //         foreach($curSession as $value){
         //             if(is_array($value)){
         //                 if(array_key_first($value)=='parent_id'){
         //                     $ppath = File::where('id',$value['parent_id'])->pluck('path')->first();
-        //                 } 
+        //                 }   
         //             }
         //         }   
-        //         $step->file('path')->disk('admin')->move($ppath);
+        //         $step->file('path')->disk('admin')->move($ppath)->autoSave(false);
         //     })->done(function () use ($form){
         //         return view();
-        //     });
+        //     });      
 
 
         // $form->file('path')->disk('admin');
-        $form->select('parent_id','父目录')->options(File::where('parent_id','0')->pluck('path','id'));
+        // $form->select('parent_id','父目录')->options(File::where('parent_id','0')->pluck('path','id'));
 
         $pid = request()->input('parent_id');
 
         $ppath = File::where('id',$pid)->pluck('path')->first();
 
-        $form->file('path')->disk('admin')->move($ppath);
+        $form->file('path')->disk('admin')->move($ppath)->autoSave(false);
         //怎么实现在form post时上传文件？¿？¿
 
         $form->select('solutions_id',__('Solution name'))->options(Solution::all()->pluck('name', 'id'));
+
+        $form->deleting(function (Form $form){
+            $data = $form->model()->toArray();
+            foreach($data as $value){
+                $disk = Storage::disk('admin');
+                $disk -> delete(''.$value['path']);
+            }
+        });
 
         return $form;
     }

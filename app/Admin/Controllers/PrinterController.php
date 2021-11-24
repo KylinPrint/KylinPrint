@@ -24,8 +24,10 @@ use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
 use Illuminate\Database\Eloquent\Collection;
 use App\Admin\Extensions\Exporter\PrinterExporter;
+use App\Admin\Repositories\Project_Tag; 
 use App\Models\Industry_Tag_Bind;
 use App\Models\Project_Tag_Bind;
+use App\Models\Project_Tag as Project;
 
 use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
 
@@ -205,45 +207,10 @@ class PrinterController extends AdminController
         $grid->column('created_at')->hide();
 
         //包括关联表的更新时间取最新
+
         $grid->column('update')->display(function(){
             $id = $this->id;
-        
-        $CurBindUpDate_AT_Exist = Bind::where("printers_id",$id)->exists();
-        $CurIndustryUpDate_AT_Exist = Industry_Tag_Bind::where("printers_id",$id)->exists();
-        $CurProjectUpDate_AT_Exist = Project_Tag_Bind::where("printers_id",$id)->exists();
-    
-        $UpdateArr = array();
-    
-        $UpdateArr[] = Printer::where("id",$id)->pluck('updated_at')->first()->timestamp;
-    
-        if($CurBindUpDate_AT_Exist)
-        {
-            $CurBindUpDate_AT = Bind::where("printers_id",$id)->pluck('updated_at');
-            foreach ($CurBindUpDate_AT as $value)
-            {
-                array_push($UpdateArr,($value->timestamp));
-            }
-        }
-    
-        if($CurIndustryUpDate_AT_Exist)
-        {
-            $CurIndustryUpDate_AT = Industry_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
-            foreach ($CurIndustryUpDate_AT as $value)
-            {
-                $a = $value;
-                array_push($UpdateArr,($value->timestamp));
-            }
-        }
-        if($CurProjectUpDate_AT_Exist)
-        {
-            $CurProjectUpDate_AT = Project_Tag_Bind::where("printers_id",$id)->pluck('updated_at');
-            foreach ($CurProjectUpDate_AT as $value)
-            {
-                array_push($UpdateArr,($value->timestamp));
-            }
-        }
-        
-        return date("Y-m-d H:i",max($UpdateArr));
+            return PrinterController::UpdateFilter($id);
         });
 
         $grid->column('updated_at')->hide();
@@ -324,11 +291,13 @@ class PrinterController extends AdminController
     {
 
         return Form::make(Printer::with(['brands','solutions','binds','industry_tags']), function (Form $form){
+
+            
             $states = [
                 'on'  => ['value' => 1, 'text' => '是', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => '否', 'color' => 'danger'],
             ];
-            
+
             $form->select('brands_id', __('Brands'))->options(Brand::all()->pluck('name', 'id'));
             $form->text('model', __('Model'));
             $form->select('type', __('Printer Type'))->options(['mono' => 'Mono', 'color' => 'Color']);
@@ -348,52 +317,45 @@ class PrinterController extends AdminController
             $form->date('release_date', __('Release date'));
             $form->switch('onsale', __('Onsale'))->options($states);
             $form->switch('network', __('Network'))->options($states);
-           
+        
             $form->select('duplex', __('Duplex'))->options([
                 'single' => __('Single'),
                 'manual' => __('Manual Duplex'),
                 'duplex' => __('Auto Duplex')
             ]);
             $form->text('pagesize', __('Pagesize'));
-    
-            //TODO 当solution删除时不删除对应bind而是将solution_id删除，待改
-            $form->multipleSelect('solutions',__('Solution name'))
-            ->options(Solution::all()->pluck('name', 'id'))
+
+            $form->multipleSelect('project_tags',__('涉及项目'))
+            ->options(Project::all()->pluck('name', 'id'))
             ->customFormat(function ($v) {
                 if (! $v) {
                     return [];
                 }
-
-                // 从数据库中查出的二维数组中转化成ID
                 return array_column($v, 'id');
             });
 
-            //TODO 导致上个多选框删除时只删除bind中solution_id字段，原因未明,与上同一个问题
-            if (!$form->isCreating()){
-                $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
+            
+            $form->hasMany('binds', '适配平台', function (Form\NestedForm $form){
 
-                    $form->text('solution_name', '解决方案名')->disable()->customFormat(function ($v) {
-                        $a = $this->toArray();
-                        $b = Solution::where('id',$a['solutions_id'])->pluck('name')->first();
-                        return $b;
-                    });
-                      
-                    $form->multipleSelect('adapter')->options([
-                        'V4_ARM' => 'V4_ARM','V4_X86' => 'V4_X86','V4_MIPS' => 'V4_MIPS',
-                        'V7_ARM' => 'V7_ARM','V7_X86' => 'V7_X86','V7_MIPS' => 'V7_MIPS',
-                        'V10_ARM' => 'V10_ARM','V10_X86' => 'V10_X86','V10_MIPS' => 'V10_MIPS',
-                        'V10SP1_ARM' => 'V10SP1_ARM','V10SP1_X86' => 'V10SP1_X86','V10SP1_MIPS' => 'V10SP1_MIPS',
-                        'V10SP1_LoongArch' => 'V10SP1_LoongArch'
-                    ]);
-                    $form->select('checked')->options([
-                        0 => '未验证',1 => '已验证'
-                    ]);        
-                })->disableDelete()->disableCreate()->useTable();
-            }    
+                $form->select('solutions_id',__('Solution name'))
+                    ->options(Solution::all()->pluck('name', 'id'));
+                            
+                $form->multipleSelect('adapter')->options([
+                    'V4_ARM' => 'V4_ARM','V4_X86' => 'V4_X86','V4_MIPS' => 'V4_MIPS',
+                    'V7_ARM' => 'V7_ARM','V7_X86' => 'V7_X86','V7_MIPS' => 'V7_MIPS',
+                    'V10_ARM' => 'V10_ARM','V10_X86' => 'V10_X86','V10_MIPS' => 'V10_MIPS',
+                    'V10SP1_ARM' => 'V10SP1_ARM','V10SP1_X86' => 'V10SP1_X86','V10SP1_MIPS' => 'V10SP1_MIPS',
+                    'V10SP1_LoongArch' => 'V10SP1_LoongArch'
+                ]);
+                $form->select('checked')->options([
+                    0 => '未验证',1 => '已验证'
+                ]);        
+            })->useTable();
+              
     
             $form->hidden('adapter_status');
 
-            if (!$form->isCreating()){
+            if (!$form->isCreating()) {
                 $form->saving(function (Form $form) {
                     if($form->isEditing()){
                         $id = request()->route()->parameters()['printer'];
@@ -413,7 +375,9 @@ class PrinterController extends AdminController
             }
             else{$form->adapter_status = 0;}
             //待优化
-                       
+            
+
+            
     
             $form->confirm('确定更新吗？', 'edit');
             $form->confirm('确定创建吗？', 'create');
@@ -424,8 +388,7 @@ class PrinterController extends AdminController
 
     }
 
-    public function UpdateFilter($request){
-        $id = $request->id;
+    public static function UpdateFilter($id){
         
         $CurBindUpDate_AT_Exist = Bind::where("printers_id",$id)->exists();
         $CurIndustryUpDate_AT_Exist = Industry_Tag_Bind::where("printers_id",$id)->exists();

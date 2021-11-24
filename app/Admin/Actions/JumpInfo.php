@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class JumpInfo extends RowAction
 {
-    public $name = '详情';
+    public function title()
 
-    public function handle(Model $model)
+    {
+        return '详情';
+    }
+
+    public function handle()
     {
         // $model ...
-
-        return $this->response()->success('Success message.')->refresh();
+        //?
+        //return $this->response()->success('Success message.')->refresh();
     }
     
     public function href(){

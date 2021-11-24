@@ -59,35 +59,60 @@ class SolutionMatchForm extends Form
         $curMatchArr = array();
         $curMatchArr[0] = 
         [
-            '型号' => '型号',
             '厂商' => '厂商',
+            '型号' => '型号',
             '系统版本' => '系统版本',
             '系统架构' => '系统架构',
             '解决方案名' => '解决方案名',
             '解决方案详情' => '解决方案详情',
+            '适配状态' => '适配状态'
         ];
         $i = 1;
 
-        foreach($array as $curImport)
+        foreach($array as $curInput)
         {   
             $curMatchArr[$i] = 
             [
-                '型号' => $curImport['型号'],
-                '厂商' => $curImport['厂商'],
-                '系统版本' => $curImport['系统版本'],
-                '系统架构' => $curImport['系统架构'],
+                '厂商' => $curInput['厂商'],
+                '型号' => $curInput['型号'],
+                '系统版本' => $curInput['系统版本'],
+                '系统架构' => $curInput['系统架构'],
                 '解决方案名' => '暂无适配方案',
-                '解决方案详情' => null
+                '解决方案详情' => null,
+                '适配状态' => '未适配',
             ];
-            $curPrinterIdArr = Printer::where('model','like',$curImport['型号'])->pluck('id');
+            preg_match('/\d+/',$curInput['型号'],$InputNum);
+
+            $curPrinterIdArr = Printer::where('model','like','%'.$InputNum[0].'%')->pluck('id');
+            $curPrinterArr = array();
+            //TODO 目前仅匹配厂商和型号数字，考虑如何优化型号匹配
             
-            foreach($curPrinterIdArr as $curPrinterId)
+            foreach($curPrinterIdArr as $pid)
+            {
+                preg_match('/\d+/',Printer::where('id',$pid)->pluck('model')->first(),$curPrinterNum);
+                if($curPrinterNum[0] == $InputNum[0])
+                {
+                    if($curInput['厂商'])
+                    {
+                        $curBrandId = Printer::where('id',$pid)->pluck('brands_id')->first();
+                        if(Brand::where('id',$curBrandId)->pluck('name')->first() == $curInput['厂商'] || Brand::where('id',$curBrandId)->pluck('name_en')->first() == $curInput['厂商'])
+                        {
+                            array_push($curPrinterArr,$pid);
+                        }
+                    }
+                    else{array_push($curPrinterArr,$pid);}
+                }
+            }
+
+            //待优化，应该可以sql查询处理
+            
+            foreach($curPrinterArr as $curPrinterId)
             {
                 if($curPrinterId)
                 {
                     $curBindAdapterId = Bind::where('printers_id',$curPrinterId)->pluck('id');
 
-                    $curAdapter = $curImport['系统版本'].'_'.$curImport['系统架构'];
+                    $curAdapter = $curInput['系统版本'].'_'.$curInput['系统架构'];
 
                     if(isEmpty($curBindAdapterId))
                     {
@@ -123,6 +148,8 @@ class SolutionMatchForm extends Form
                         {
                             if($curAdapter == $value)
                             {
+                                if(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 1){$curMatchArr[$i]['适配状态'] = '已验证';}
+                                elseif(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 2){$curMatchArr[$i]['适配状态'] = '待验证';}
                                 if($curMatchArr[$i]['解决方案名'] == '暂无适配方案')
                                 {
                                     $curMatchArr[$i]['解决方案名'] = $curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();

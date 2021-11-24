@@ -47,19 +47,21 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
                     return null;
                 }
             }
-        }                     
+        }     
+        
 
         return new Bind([
                 'printers_id' => $curPrinterId,   
                 'solutions_id' => $curSolutionId,
-                'adapter' => $curBindAdapter
+                'adapter' => $curBindAdapter,
+                'checked' => $row['适配状态'] == '已验证'?1:2
         ]);
 
     }
     
     public function batchSize(): int
     {
-        return 1000;
+        return 5;
     }
     //以1000条数据基准切割数据
     public function chunkSize(): int
@@ -74,6 +76,6 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
      */
     public function startRow(): int
     {
-        return 2;
+        return 1000;
     }
 }
