@@ -35,3 +35,7 @@ composer.lock
 ## macOS
 ._.DS_Store
 .DS_Store
+
+
+## Upload files
+/public/uploads/*
