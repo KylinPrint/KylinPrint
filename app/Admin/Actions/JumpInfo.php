@@ -13,11 +13,11 @@ class JumpInfo extends RowAction
         return '详情';
     }
 
-    public function handle(Model $model)
+    public function handle()
     {
         // $model ...
-
-        return $this->response()->success('Success message.')->refresh();
+        //?
+        //return $this->response()->success('Success message.')->refresh();
     }
     
     public function href(){
