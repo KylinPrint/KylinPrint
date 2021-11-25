@@ -2,7 +2,6 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Actions\Exports\SolutionMatchExport;
 use App\Models\Solution;
 use Dcat\Admin\Http\Controllers\AdminController;
 use App\Admin\Actions\Modal\SolutionMatchModal;
@@ -10,9 +9,7 @@ use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use Dcat\Admin\Admin;
-use App\Exports\TestExport;
-use Facade\Ignition\Commands\SolutionMakeCommand;
-use Maatwebsite\Excel\Facades\Excel;
+
 
 class SolutionController extends AdminController
 {
@@ -40,12 +37,6 @@ class SolutionController extends AdminController
             $grid->disableCreateButton();
         }
 
-        if(Admin::user()->can('edit-printers')){
-            $grid->tools(function (Grid\Tools $tools) { 
-                //Solution匹配
-                $tools->append(new SolutionMatchModal());
-            });
-        }
 
         if(!Admin::user()->can('edit-solutions')){
             $grid->actions(function (Grid\Displayers\Actions $actions) {

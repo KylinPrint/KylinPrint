@@ -4,7 +4,7 @@ namespace App\Admin\Renderable;
 
 use App\Models\Project_Tag_Bind;
 use Dcat\Admin\Grid;
-use App\Models\Project_Tag as Project_Tad_Model;
+use App\Models\Project_Tag ;
 use App\Models\Printer;
 use Dcat\Admin\Support\LazyRenderable;
 use Dcat\Admin\Widgets\Table;
@@ -23,7 +23,7 @@ class ProjectTable extends LazyRenderable
         $data = array();
 
         foreach ($arrIds as $value){
-            $a = Project_Tad_Model::where('id',$value)->get(['id','name','created_at'])->toArray();
+            $a = Project_Tag::where('id',$value)->get(['id','name','created_at'])->toArray();
             if($data){$data = array_merge($data,$a);}
             else{$data = $a;}   
         }

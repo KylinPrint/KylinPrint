@@ -10,6 +10,7 @@ use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Admin;
 use App\Admin\Renderable\ProjectTable;
+use App\Admin\Renderable\SolutionTable;
 use Dcat\Admin\Widgets\Modal;
 use Dcat\Admin\Layout\Content;
 use Dcat\Admin\Grid\Filter\Like;
@@ -22,14 +23,11 @@ use App\Models\Industry_Tag;
 use App\Models\Principle_Tag;
 use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
-use Illuminate\Database\Eloquent\Collection;
 use App\Admin\Extensions\Exporter\PrinterExporter;
-use App\Admin\Repositories\Project_Tag; 
 use App\Models\Industry_Tag_Bind;
 use App\Models\Project_Tag_Bind;
 use App\Models\Project_Tag as Project;
 
-use function Doctrine\StaticAnalysis\DBAL\makeMeACustomConnection;
 
 class PrinterController extends AdminController
 {
@@ -197,12 +195,16 @@ class PrinterController extends AdminController
 
         $grid->column('project_tags',__('涉及项目'))->display('详情')->modal(function ($modal) {
             $modal->title('涉及项目');
-        
             return ProjectTable::make(['title' => $this->title]);
         });
         
+        $grid->column('solutions', __('Solutions'))->display('预览')->modal(function ($modal) {
+            $modal->title('解决方案');
+            $id = $this->id;
+            return SolutionTable::make(['id' => $this->id,'title' => $this->title]);
+        });
 
-        $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
+        //$grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
         $grid->column('created_at')->hide();
 
@@ -253,32 +255,36 @@ class PrinterController extends AdminController
         $show->duplex(__('Duplex'));
         $show->pagesize(__('Pagesize'));
         // //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
-        $show->binds(__('Solutions'), function ($model) {
-            $grid = new Grid(Bind::with(['printers','solutions']));
+        // $show->binds(__('Solutions'), function ($model) {
+        //     $grid = new Grid(Bind::with(['printers','solutions']));
 
-            $grid->model()->where('printers_id', $model->id);
-            $grid->disableFilter();
-            //$grid->disableExport();
-            $grid->disableCreateButton();
-            $grid->setResource('/admin/comments');
-            $grid->column('solutions.name', __('Solution name'));
-            $grid->column('solutions.comment', __('Solution comment'));
-            $grid->checked(__('Checked'))->display(function ($checked) {
-                if     ($checked == '0') { return '未验证'; }
-                elseif ($checked == '1') { return '已验证'; }
-                else                     { return ''; };
-            });
-            $grid->column('adapter',__('适配平台'))->label();
-            $grid->actions(function ($actions) {
-                $actions->disableDelete();
-                $actions->disableEdit();     
-                $actions->disableView();
-                $actions->append(new JumpInfo($actions->row['id']));
+        //     $grid->setActionClass(Grid\Displayers\Actions::class);
 
-            });
+        //     $grid->model()->where('printers_id', $model->id);
+        //     $grid->disableFilter();
+        //     //$grid->disableExport();
+        //     $grid->disableCreateButton();
+        //     $grid->setResource('/admin/comments');
+        //     $grid->column('solutions.name', __('Solution name'));
+        //     $grid->column('solutions.comment', __('Solution comment'));
+        //     $grid->checked(__('Checked'))->display(function ($checked) {
+        //         if     ($checked == '0') { return '未验证'; }
+        //         elseif ($checked == '1') { return '已验证'; }
+        //         else                     { return ''; };
+        //     });
+        //     $grid->column('adapter',__('适配平台'))->label();
+        //     $grid->actions(function ($actions) {
+        //         $actions->disableDelete();
+        //         $actions->disableEdit();     
+        //         $actions->disableView();
+        //         $curStr = '<a href = "/admin/solutions/'.$actions->row['solutions_id'].'">详情</a>';
+        //         $actions->append($curStr);
+        //         //$actions->append(new JumpInfo($actions->row['id']));
 
-            return $grid;
-        });
+        //     });
+
+        //     return $grid;
+        // });
         return $show;
     }
 
