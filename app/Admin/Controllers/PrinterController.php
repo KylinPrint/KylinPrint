@@ -92,12 +92,13 @@ class PrinterController extends AdminController
 
 
             $selector->select('checked','适配状态',[
+                0 => '未适配',
                 1 => '已验证',
                 2 => '待验证',
                 3 => '已适配',
             ],function($query,$value)
             {
-                if($value != 0)
+                if($value[0] != 0)
                 {
                     $query->WhereHas('binds',function($query) use ($value)
                     {
@@ -106,7 +107,10 @@ class PrinterController extends AdminController
                 }
                 else
                 {
-                    //TODO 无适配方案怎么查
+                    $query->whereNotIn('id',function($query)
+                    {
+                        $query->select('printers_id')->from('binds');
+                    });
                 }
                 
             });
