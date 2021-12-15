@@ -40,18 +40,54 @@ class PrinterImport implements ToModel, WithStartRow, WithBatchInserts, WithChun
 
         $curBrandId = Brand::where('name_en',$row['manufacter(厂商英文名)'])->pluck('id')->first();
         
-        if($row['是否彩打'] == '彩色') $curType = 'color';
-        elseif($row['是否彩打'] == '黑白') $curType = 'mono';
-        else $curType = null;
+        
+        switch ($row['是否彩打']){
+            case '彩色':
+                $curType = 'color';
+                break;
+            case '黑白':
+                $curType = 'mono';
+                break;
+            default:
+                $curType = null;
+        }
+    
 
-        if($row['分类2'] == '热敏打印机') $curPrinciple = '1';
-        elseif($row['分类2'] == '喷墨打印机') $curPrinciple = '2';
-        elseif($row['分类2'] == '激光打印机') $curPrinciple = '3';
-        elseif($row['分类2'] == '针式打印机') $curPrinciple = '4';
-        else $curPrinciple = '5';
+        if($row['分类2']){
+            switch ($row['分类2']){
+                case '热敏打印机':
+                    $curPrinciple = '1';
+                    break;
+                case '喷墨打印机':
+                    $curPrinciple = '2';
+                    break;
+                case '激光打印机':
+                    $curPrinciple = '3';
+                    break;
+                case '针式打印机':
+                    $curPrinciple = '4';
+                    break;
+                default:
+                    $curPrinciple = '5'; 
+            }
+        }
 
+        
         if ($row['上市日期'] == '暂无数据' || !isset($row['上市日期'])){$date = null;}
         else {$date = date('Y-m-d', ($row ['上市日期'] - 25569) * 24 * 3600);}
+
+        if($row['是否停产']){
+            switch ($row['是否停产']){
+                case '停产':
+                    $curOnsale = '0';
+                    break;
+                case '在售';
+                    $curOnsale = '1';
+                    break;
+                default:
+                    $curOnsale = '2';
+            }
+        }
 
         if($row['是否停产'] == '停产'){$curOnsale = 0;}
         elseif($row['是否停产'] == '在售'){$curOnsale = 1;}
@@ -104,7 +140,7 @@ class PrinterImport implements ToModel, WithStartRow, WithBatchInserts, WithChun
     //批量导入1000条
     public function batchSize(): int
     {
-        return 1000;
+        return 1;
     }
     //以1000条数据基准切割数据
     public function chunkSize(): int

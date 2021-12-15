@@ -34,7 +34,7 @@ class SolutionImport implements ToModel, WithStartRow, WithBatchInserts, WithChu
             return null;
         }
 
-        $curDetail = '<p>'.$row['安装包名称(package_name)'].'</p>';
+        $curDetail = '<p>'.$row['解决方案'].'</p>';
                 
         return new Solution([
             'name' => $row['解决方案名'],
@@ -47,12 +47,12 @@ class SolutionImport implements ToModel, WithStartRow, WithBatchInserts, WithChu
 
     public function batchSize(): int
     {
-        return 100;
+        return 1;
     }
     //以1000条数据基准切割数据
     public function chunkSize(): int
     {
-        return 100;
+        return 1;
     }
 
 

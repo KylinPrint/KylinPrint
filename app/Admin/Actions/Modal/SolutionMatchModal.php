@@ -2,7 +2,9 @@
 
 namespace App\Admin\Actions\Modal;
 
+use App\Admin\Actions\Form\PrinterCheckForm;
 use App\Admin\Actions\Form\SolutionMatchForm;
+use App\Models\PrinterCheck;
 use Dcat\Admin\Admin;
 use Dcat\Admin\Grid\Tools\AbstractTool;
 use Dcat\Admin\Traits\HasPermissions;
@@ -19,19 +21,24 @@ class SolutionMatchModal extends AbstractTool
 
     public function render()
     {
-        $id = "reset-pwd-{$this->getKey()}";
+        $id1 = "reset-pw-{$this->getKey()}";
+        $id2 = "reset-pwd-{$this->getKey()}";
 
         // 模态窗
-        $this->modal($id);
+        $this->modal1($id1);
+        $this->modal2($id2);
 
         return <<<HTML
-<span class="grid-expand" data-toggle="modal" data-target="#{$id}">
+<span class="grid-expand1" data-toggle="modal" data-target="#{$id1}">
    <a href="javascript:void(0)"><button class="btn btn-outline-info ">导入适配需求</button></a>
+</span>
+<span class="grid-expand2" data-toggle="modal" data-target="#{$id2}">
+   <a href="javascript:void(0)"><button class="btn btn-outline-info ">导入筛查后型号表</button></a>
 </span>
 HTML;
     }
 
-    protected function modal($id)
+    protected function modal1($id1)
     {
         $form = new SolutionMatchForm();
 
@@ -43,12 +50,41 @@ HTML;
         // 通过 Admin::html 方法设置模态窗HTML
         Admin::html(
             <<<HTML
-<div class="modal fade" id="{$id}">
+<div class="modal fade" id="{$id1}">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">型号数据</h4>
+         <button type="button" class="close" data-dismiss="modal1" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        {$form->render()}
+      </div>
+    </div>
+  </div>
+</div>
+HTML
+        );
+    }
+
+    protected function modal2($id2)
+    {
+        $form = new PrinterCheckForm();
+
+        Admin::script('Dcat.onPjaxComplete(function () {
+            $(".modal-backdrop").remove();
+            $("body").removeClass("modal-open");
+        }, true)');
+
+        // 通过 Admin::html 方法设置模态窗HTML
+        Admin::html(
+            <<<HTML
+<div class="modal fade" id="{$id2}">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">处理数据</h4>
-         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+         <button type="button" class="close" data-dismiss="modal2" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
         {$form->render()}

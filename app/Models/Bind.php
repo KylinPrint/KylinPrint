@@ -16,8 +16,11 @@ class Bind extends Model
         'solutions_id',
         'adapter',
         'checked',
+        'comments',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'completion_time',
+        'auth',
     ];
 
     public function printers()

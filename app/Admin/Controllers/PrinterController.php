@@ -49,6 +49,7 @@ class PrinterController extends AdminController
         $grid = new Grid(Printer::with(['brands','solutions','binds','industry_tags','principle_tags','project_tags']));
         //$grid->fixColumns(3);   //冻结前三列
 
+
         $grid->setActionClass(ContextMenuActions::class);
         $grid->showColumnSelector();
         if(!Admin::user()->can('create-printers')){
@@ -57,7 +58,8 @@ class PrinterController extends AdminController
         
         $grid->export(new PrinterExporter());
 
-        $grid->quickSearch('model');    //快速搜索
+        $grid->quickSearch('model','brands.name','brands.name_en');    //快速搜索
+
        
         $grid->filter(function($filter){
             // 去掉默认的id过滤器
@@ -77,22 +79,46 @@ class PrinterController extends AdminController
 
         $grid->selector(function (Grid\Tools\Selector $selector) {
             
-            $selector->select('brands_id', __('Brand'), [
-                149 => '立象',156 => '兄弟',157 => '佳能',165 => '得实',170 => '爱普生',
-                173 => '富士施乐',174 => '富士通',175 => '佳博',187 => '惠普',195 => '柯尼卡美能达',
-                196 => '京瓷',199 => '联想',200 => '利盟',203 => '南天',217 => '理光',
-                222 => '三星',225 => '夏普',234 => '光电通',235 => '东芝',236 => '天津国聚',
+            $selector->select('brands_id', __('品牌'), [
+                187 => '惠普',157 => '佳能',156 => '兄弟',173 => '富士施乐',217 => '理光',
+                225 => '夏普',196 => '京瓷',195 => '柯尼卡美能达',235 => '东芝',236 => '天津国聚',
+                150 =>'震旦',210 => '奔图',178 => '高德品创',197 =>'立思辰',
+                234 => '光电通',170 => '爱普生',199 => '联想',200 => '利盟',222 => '三星',
             ]);
-            $selector->select('onsale', __('Onsale'), [
+            $selector->select('onsale', __('是否在售'), [
                 1 => '在售',
                 0 => '停产'
             ]);
 
-            $selector->select('adapter_status', __('适配状态'), [
-                0 => '未适配',
-                1 => '未验证',
-                2 => '已验证'
-            ]);
+
+            $selector->select('checked','适配状态',[
+                1 => '已验证',
+                2 => '待验证',
+                3 => '已适配',
+            ],function($query,$value)
+            {
+                if($value != 0)
+                {
+                    $query->WhereHas('binds',function($query) use ($value)
+                    {
+                        $query->where('checked',$value);
+                    });
+                }
+                else
+                {
+                    //TODO 无适配方案怎么查
+                }
+                
+            });
+
+            $selector->selectOne('auth','互认证状态',[
+                1 => '是',
+                2 => '否',
+            ],function($query,$value){
+                $query->whereHas('binds',function ($query) use ($value){
+                    $query->where('auth',$value);
+                });
+            });
 
             //TODO 查V10会把V10SP1也输出
             $selector->selectOne('sys','适配系统',[
@@ -106,9 +132,9 @@ class PrinterController extends AdminController
                       
                 });
             });
-            
+        
             $selector->selectOne('frome','适配架构',[
-                '_X86' => 'X86','_ARM' => 'ARM','_MIPS' => 'MIPS','_LoongAarch' => 'LoongAarch'
+                '_X86' => 'X86','_ARM' => 'ARM','_MIPS' => 'MIPS','_Loongarch' => 'Loongarch'
             ],function($query,$value){
                 $this->b = $value;
                 $query->whereHas('binds', function ($query) {
@@ -117,22 +143,29 @@ class PrinterController extends AdminController
             });
                     
         }); //表头过滤
+
+        //获取表头平台选项
+        $curSelector = isset((request()->all())['_selector'])?(request()->all())['_selector']:null;
+        $curSys = isset($curSelector['sys'])?substr($curSelector['sys'],0,strrpos($curSelector['sys'],'_')):null;
+        $curFrome = isset($curSelector['frome'])?substr(strrchr($curSelector['frome'],'_'),1):null;
+        $curAdapter = $curSys.'_'.$curFrome;
         
+
         $grid->column('id', __('ID'))->sortable()->hide();
 
         //TODO 一排序就炸
-        $grid->column('brands.name', __('Brand'))->sortable()->help('CCC');
-        $grid->column('model', __('Model'))->sortable();
-        $grid->column('type', __('Printer Type'))->display(function ($printerType) {
+        $grid->column('brands.name', __('品牌'))->sortable()->help('CCC');
+        $grid->column('model', __('型号'))->sortable();
+        $grid->column('type', __('是否彩打'))->display(function ($printerType) {
             if     ($printerType == 'mono')  { return '黑白'; }
             elseif ($printerType == 'color') { return '彩色'; }
             else                             { return ''; }
         });
 
 
-        $grid->column('industry_tags',__('应用行业'))->pluck('name')->label();
-        $grid->column('principle_tags.name', __('打印机工作方式'));
-        $grid->column('release_date', __('Release date'));
+        $grid->column('industry_tags',__('应用行业'))->pluck('name')->label();  
+        $grid->column('principle_tags.name', __('打印机类型'));  //待商榷
+        $grid->column('release_date', __('发售日期'));
         $grid->column('onsale', __('在售'))->display(function ($onsale) {
             if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
             elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
@@ -151,19 +184,19 @@ class PrinterController extends AdminController
         })->hide();
         $grid->column('pagesize', __('最大幅面'))->hide(); 
 
-        $grid->column('adapter_status','适配状态')->display(function ($adapter_status){
-            if     ($adapter_status == 0)  { return '未适配'; }
-            elseif ($adapter_status == 1) { return '未验证'; }
-            elseif ($adapter_status == 2) { return '已验证'; }
-        })->dot(
-            [
-                0 => 'danger',
-                1 => 'primary',
-                2 => 'success',
-            ], 
-            'danger' // 默认值
-        );
-    
+        // $grid->column('adapter_status','适配状态')->display(function ($adapter_status){
+        //     if     ($adapter_status == 0)  { return '未适配'; }
+        //     elseif ($adapter_status == 1) { return '未验证'; }
+        //     elseif ($adapter_status == 2) { return '已验证'; }
+        // })->dot(
+        //     [
+        //         0 => 'danger',
+        //         1 => 'primary',
+        //         2 => 'success',
+        //     ], 
+        //     'danger' // 默认值
+        // );
+        
         //TODO 需加空验证
         $grid->column('binds',__('适配平台'))->display(function($binds){
             $Arr1 = array();
@@ -178,7 +211,7 @@ class PrinterController extends AdminController
                 foreach ($Arr1 as $value){
                     $a = 0;
                     foreach ($Arr2 as $value){
-                        if ($Arr2 == $value){$a++;}
+                        if ($Arr2 == $value){++$a;}
                     }
                     if ($a == 0){ $Arr2 = $Arr1;}
                         $a = 0;
@@ -190,32 +223,36 @@ class PrinterController extends AdminController
         })->label()->hide();
         //判断条件待优化
 
-        
-        // $grid->column('project_tags',__('涉及项目'))->pluck('name')->label();
 
         $grid->column('project_tags',__('涉及项目'))->display('详情')->modal(function ($modal) {
             $modal->title('涉及项目');
             return ProjectTable::make(['title' => $this->title]);
         });
         
-        $grid->column('solutions', __('Solutions'))->display('预览')->modal(function ($modal) {
+       
+
+        $grid->column('binds', __('解决方案'))->modal(function ($modal) use ($curAdapter){
             $modal->title('解决方案');
-            $id = $this->id;
-            return SolutionTable::make(['id' => $this->id,'title' => $this->title]);
+            $modal->xl();
+            $modal->value(count(Bind::where([
+                ['adapter','like','%'.$curAdapter.'%'],
+                ['printers_id',$this->id]
+            ])->get()));
+
+            return SolutionTable::make(['id'=>$this->id,'adapter'=>$curAdapter]);
         });
 
-        //$grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
+        // $grid->column('solutions', __('Solutions'))->view('admin/printer/solution');
 
         $grid->column('created_at')->hide();
 
         //包括关联表的更新时间取最新
 
-        $grid->column('update')->display(function(){
+        $grid->column('update',__('更新时间'))->display(function(){
             $id = $this->id;
             return PrinterController::UpdateFilter($id);
         });
 
-        $grid->column('updated_at')->hide();
         
 
         return $grid;
@@ -255,36 +292,38 @@ class PrinterController extends AdminController
         $show->duplex(__('Duplex'));
         $show->pagesize(__('Pagesize'));
         // //TODO 解决方案 新增Bind控制器解决新增/修改解决方案
-        // $show->binds(__('Solutions'), function ($model) {
-        //     $grid = new Grid(Bind::with(['printers','solutions']));
+        $show->binds(__('Solutions'), function ($model) {
+            $grid = new Grid(Bind::with(['printers','solutions']));
 
-        //     $grid->setActionClass(Grid\Displayers\Actions::class);
+            $grid->setActionClass(Grid\Displayers\Actions::class);
 
-        //     $grid->model()->where('printers_id', $model->id);
-        //     $grid->disableFilter();
-        //     //$grid->disableExport();
-        //     $grid->disableCreateButton();
-        //     $grid->setResource('/admin/comments');
-        //     $grid->column('solutions.name', __('Solution name'));
-        //     $grid->column('solutions.comment', __('Solution comment'));
-        //     $grid->checked(__('Checked'))->display(function ($checked) {
-        //         if     ($checked == '0') { return '未验证'; }
-        //         elseif ($checked == '1') { return '已验证'; }
-        //         else                     { return ''; };
-        //     });
-        //     $grid->column('adapter',__('适配平台'))->label();
-        //     $grid->actions(function ($actions) {
-        //         $actions->disableDelete();
-        //         $actions->disableEdit();     
-        //         $actions->disableView();
-        //         $curStr = '<a href = "/admin/solutions/'.$actions->row['solutions_id'].'">详情</a>';
-        //         $actions->append($curStr);
-        //         //$actions->append(new JumpInfo($actions->row['id']));
+            $grid->model()->where('printers_id', $model->id);
+            $grid->disableFilter();
+            //$grid->disableExport();
+            $grid->disableCreateButton();
+            $grid->setResource('/admin/comments');
+            $grid->column('id',__('id'));
+            $grid->column('solutions.name', __('Solution name'));
+            $grid->column('solutions.comment', __('Solution comment'));
+            $grid->checked(__('Checked'))->display(function ($checked) {
+                if     ($checked == '0') { return '未验证'; }
+                elseif ($checked == '1') { return '已验证'; }
+                elseif ($checked == '2') { return '待验证'; }
+                else                     { return ''; };
+            });
+            $grid->column('adapter',__('适配平台'))->label();
+            $grid->actions(function ($actions) {
+                $actions->disableDelete();
+                $actions->disableEdit();     
+                $actions->disableView();
+                $curStr = '<a href = "/admin/solutions/'.$actions->row['solutions_id'].'">详情</a>';
+                $actions->append($curStr);
+                //$actions->append(new JumpInfo($actions->row['id']));
 
-        //     });
+            });
 
-        //     return $grid;
-        // });
+            return $grid;
+        });
         return $show;
     }
 
@@ -351,39 +390,35 @@ class PrinterController extends AdminController
                     'V7_ARM' => 'V7_ARM','V7_X86' => 'V7_X86','V7_MIPS' => 'V7_MIPS',
                     'V10_ARM' => 'V10_ARM','V10_X86' => 'V10_X86','V10_MIPS' => 'V10_MIPS',
                     'V10SP1_ARM' => 'V10SP1_ARM','V10SP1_X86' => 'V10SP1_X86','V10SP1_MIPS' => 'V10SP1_MIPS',
-                    'V10SP1_LoongArch' => 'V10SP1_LoongArch'
+                    'V10SP1_Loongarch' => 'V10SP1_Loongarch'
                 ]);
                 $form->select('checked')->options([
-                    0 => '未验证',1 => '已验证'
+                    0 => '未验证',1 => '已验证',2 => '待验证',
                 ]);        
             })->useTable();
               
     
             $form->hidden('adapter_status');
-
-            if (!$form->isCreating()) {
-                $form->saving(function (Form $form) {
-                    if($form->isEditing()){
-                        $id = request()->route()->parameters()['printer'];
-                    }//获取当前实例id
-                    $a = Bind::where('printers_id', '=', $id)->select('id','checked')->get();
-                    $count = count($a);
-                    if($count == 0){$form->adapter_status = 0;}
-                    else {
-                        $b = 0;
-                        foreach ($a as $value){
-                            if ($value['checked'] == 1) {$b++;}
-                        }
-                        if ($b == 0) {$form->adapter_status = 1;}
-                        else $form->adapter_status = 2;
-                    };
-                }); 
-            }
-            else{$form->adapter_status = 0;}
-            //待优化
+            
+            
+            $form->saving(function (Form $form) {
+                
+                $id = request()->route()->parameters()['printer'];
+                //获取当前实例id
+                $a = Bind::where('printers_id', '=', $id)->select('id','checked')->get();
+                $count = count($a);
+                if($count == 0){$form->adapter_status = 0;}
+                else {
+                    $b = 0;
+                    foreach ($a as $value){
+                        if ($value['checked'] == 1) {++$b;}
+                    }
+                    if ($b == 0) {$form->adapter_status = 1;}
+                    else $form->adapter_status = 2;
+                };
+            }); 
             
 
-            
     
             $form->confirm('确定更新吗？', 'edit');
             $form->confirm('确定创建吗？', 'create');
@@ -393,6 +428,7 @@ class PrinterController extends AdminController
         //TODO 解决方案
 
     }
+
 
     public static function UpdateFilter($id){
         

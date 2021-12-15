@@ -19,6 +19,7 @@
  */
 use App\Admin\Extensions\WangEditor;
 use Dcat\Admin\Form;
+use Dcat\Admin\Grid;
 use Dcat\Admin\Http\Repositories\Menu;
 
 //Form::forget('map');
@@ -26,4 +27,8 @@ use Dcat\Admin\Http\Repositories\Menu;
 
 
 //Dcat\Admin\Form::forget(['map', 'editor']);
+
+Grid\Column::macro('center',function(){
+    return $this->setHeaderAttributes(['class' => 'text-center']);
+});
 

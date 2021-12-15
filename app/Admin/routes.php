@@ -27,4 +27,6 @@ Route::group([
     $router->resource('tag_binds', TagBindController::class);
     $router->resource('project_tags', ProjectTagController::class);
     $router->resource('solution_matches', SolutionMatchController::class);
+    $router->resource('printer_checks',PrinterCheckController::class);
+    $router->resource('binds', BindController::class);
 });

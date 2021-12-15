@@ -13,7 +13,7 @@ use App\Models\Brand;
 
 use function PHPUnit\Framework\isEmpty;
 
-class SolutionMatchExport implements FromCollection, WithHeadings
+class AgainSolutionMatchExport implements FromCollection, WithHeadings
 {
 
     use Exportable;

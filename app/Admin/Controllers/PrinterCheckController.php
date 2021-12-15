@@ -2,17 +2,16 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\SolutionMatch;
+use App\Models\PrinterCheck;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use Dcat\Admin\Http\Controllers\AdminController;
-use App\Admin\Actions\SolutionMatchDownload;
-use App\Admin\Actions\Modal\SolutionMatchModal;
+use App\Admin\Actions\PrinterCheckDownload;
 use App\Admin\Actions\Modal\PrinterCheckModal;
 use Illuminate\Support\Facades\Storage;
 
-class SolutionMatchController extends AdminController
+class PrinterCheckController extends AdminController
 {
     /**
      * Make a grid builder.
@@ -21,14 +20,13 @@ class SolutionMatchController extends AdminController
      */
     protected function grid()
     {
-        return Grid::make(new SolutionMatch(), function (Grid $grid) {
+        return Grid::make(new PrinterCheck(), function (Grid $grid) {
 
             $grid->disableCreateButton();
             
             $grid->tools(function (Grid\Tools $tools) { 
                 //Solution匹配
-                $tools->append(new SolutionMatchModal());
-
+                $tools->append(new PrinterCheckModal());
             });
 
             $grid->actions(function (Grid\Displayers\Actions $actions) {
@@ -38,7 +36,7 @@ class SolutionMatchController extends AdminController
     
                 $rowArray = $actions->row->toArray();
 
-                $actions->append(new SolutionMatchDownload());
+                $actions->append(new PrinterCheckDownload());
                           
             });
             
@@ -59,7 +57,7 @@ class SolutionMatchController extends AdminController
      */
     protected function detail($id)
     {
-        return Show::make($id, new SolutionMatch(), function (Show $show) {
+        return Show::make($id, new PrinterCheck(), function (Show $show) {
             
         });
     }
@@ -71,7 +69,7 @@ class SolutionMatchController extends AdminController
      */
     protected function form()
     {
-        return Form::make(new SolutionMatch(), function (Form $form) {
+        return Form::make(new PrinterCheck(), function (Form $form) {
             $form->deleting(function (Form $form){
                 $data = $form->model()->toArray();
                 foreach($data as $value){
