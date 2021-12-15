@@ -2,7 +2,7 @@
 
 namespace App\Admin\Actions\Modal;
 
-use App\Admin\Actions\Form\PrinterCheckForm;
+use App\Admin\Actions\Form\AgainSolutionMatchForm;
 use App\Admin\Actions\Form\SolutionMatchForm;
 use App\Models\PrinterCheck;
 use Dcat\Admin\Admin;
@@ -55,7 +55,7 @@ HTML;
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">型号数据</h4>
-         <button type="button" class="close" data-dismiss="modal1" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
         {$form->render()}
@@ -69,7 +69,7 @@ HTML
 
     protected function modal2($id2)
     {
-        $form = new PrinterCheckForm();
+        $form = new AgainSolutionMatchForm();
 
         Admin::script('Dcat.onPjaxComplete(function () {
             $(".modal-backdrop").remove();
@@ -84,7 +84,7 @@ HTML
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">处理数据</h4>
-         <button type="button" class="close" data-dismiss="modal2" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
         {$form->render()}

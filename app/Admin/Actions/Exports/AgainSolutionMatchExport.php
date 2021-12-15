@@ -22,7 +22,7 @@ class AgainSolutionMatchExport implements FromCollection, WithHeadings
     public function __construct($array,$file)
     {
         $time_start = $this->getmicrotime();
-        $curMatchArr = $this->WWW($array);
+        $curMatchArr = $this->WTF($array);
         $time_end = $this->getmicrotime();
         $time = $time_end - $time_start;
 
@@ -33,7 +33,9 @@ class AgainSolutionMatchExport implements FromCollection, WithHeadings
             '型号' ,
             '系统版本' ,
             '系统架构' ,
-            '匹配型号结果' ,
+            '解决方案名' ,
+            '解决方案详情' ,
+            '适配状态'
         ];
         $this->file = $file;
     }
@@ -58,54 +60,6 @@ class AgainSolutionMatchExport implements FromCollection, WithHeadings
     {
         list($usec,$sec) = explode(" ",microtime());
         return ((float)$usec + (float)$sec);
-    }
-
-
-    public function WWW($array)
-    {
-        $i = 0;
-        foreach($array as $curInput)
-        {
-            $curMatchArr[$i] = 
-            [
-                '厂商' => $curInput['厂商'],
-                '型号' => $curInput['型号'],
-                '系统版本' => $curInput['系统版本'],
-                '系统架构' => $curInput['系统架构'],
-                '匹配型号结果' => '暂无该型号数据',
-            ];
-
-            if(empty($curInput['厂商'])){
-                $curMatchArr[$i]['匹配型号结果'] = '请核实产品品牌';
-                ++$i;
-                continue;
-            }
-
-            $curBrandId = (Brand::where('name',$curInput['厂商'])->pluck('id')->first())?:(Brand::where('name_en',$curInput['厂商'])->pluck('id')->first());
-            
-            if(empty($curBrandId)){
-                $curMatchArr[$i]['解决方案名'] = '请核实产品品牌';
-                ++$i;
-                continue;
-            }
-
-            preg_match('/\d+/',$curInput['型号'],$InputNum);
-
-            $curPrinterModelArr = Printer::where([
-                ['model','like','%'.$InputNum[0].'%'],
-                ['brands_id',$curBrandId],
-            ])->pluck('model');
-            
-            if($curPrinterModelArr->isEmpty()){++$i;continue;}
-
-            
-            $curMatchArr[$i]['匹配型号结果'] = implode('/',$curPrinterModelArr->toArray());
-            
-
-            ++$i;
-        }
-
-        return $curMatchArr;
     }
 
 
