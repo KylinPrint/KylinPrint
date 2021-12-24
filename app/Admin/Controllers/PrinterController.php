@@ -24,9 +24,12 @@ use App\Models\Principle_Tag;
 use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
 use App\Admin\Extensions\Exporter\PrinterExporter;
+use App\Admin\Metrics\TestLine;
 use App\Models\Industry_Tag_Bind;
 use App\Models\Project_Tag_Bind;
 use App\Models\Project_Tag as Project;
+use App\Admin\Metrics\TestPie;
+
 
 
 class PrinterController extends AdminController
@@ -37,6 +40,18 @@ class PrinterController extends AdminController
      * @var string
      */
     protected $title = '打印机';
+
+    public function index(Content $content)
+    {
+        return $content
+            ->header('打印机')
+            ->description('打印机信息展示')
+            ->body(function ($row) {
+                $row->column(4, new TestPie());
+                $row->column(4, new TestLine());
+            })
+            ->body($this->grid());
+    }
 
 
     /**
@@ -118,8 +133,10 @@ class PrinterController extends AdminController
             $selector->selectOne('auth','互认证状态',[
                 1 => '是',
                 2 => '否',
-            ],function($query,$value){
-                $query->whereHas('binds',function ($query) use ($value){
+            ],function($query,$value)
+            {
+                $query->whereHas('binds',function ($query) use ($value)
+                {
                     $query->where('auth',$value);
                 });
             });
@@ -127,22 +144,21 @@ class PrinterController extends AdminController
             //TODO 查V10会把V10SP1也输出
             $selector->selectOne('sys','适配系统',[
                 'V4_' => 'V4','V7_' => 'V7','V10_' => 'V10','V10SP1_' => 'V10SP1'
-            ],function($query,$value){
-                $this->a = $value;
-                $query->whereHas('binds', function ($query) {
-                    
-                        $query->where('adapter', 'like', "%{$this->a}%");
-                        $curQuery = $query;
-                      
+            ],function($query,$value)
+            {
+                $query->whereHas('binds', function ($query) use ($value)
+                {                  
+                        $query->where('adapter', 'like', "%".$value."%");                    
                 });
             });
         
             $selector->selectOne('frome','适配架构',[
                 '_X86' => 'X86','_ARM' => 'ARM','_MIPS' => 'MIPS','_Loongarch' => 'Loongarch'
-            ],function($query,$value){
-                $this->b = $value;
-                $query->whereHas('binds', function ($query) {
-                    $query->where('adapter', 'like', "%{$this->b}%");
+            ],function($query,$value)
+            {
+                $query->whereHas('binds', function ($query) use ($value)
+                {
+                    $query->where('adapter', 'like', "%".$value."%");
                 });                 
             });
                     
@@ -171,7 +187,7 @@ class PrinterController extends AdminController
         $grid->column('principle_tags.name', __('打印机类型'));  //待商榷
         $grid->column('release_date', __('发售日期'));
         $grid->column('onsale', __('在售'))->display(function ($onsale) {
-            if     ($onsale == '0') { return '<i class="fa fa-close text-red"  ></i>'; }
+            if     ($onsale == '0') { return '<i class="fa fa-close text-muted"  ></i>'; }
             elseif ($onsale == '1') { return '<i class="fa fa-check text-green"></i>'; }
             else                    { return '<i class="fa fa-clock-o text-black"></i>'; }
         });

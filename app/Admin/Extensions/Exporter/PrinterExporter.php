@@ -78,10 +78,12 @@ class PrinterExporter extends BaseExport implements WithMapping, WithHeadings, F
         
         $IndustryBind_Ids = Industry_Tag_Bind::where('printers_id',$ids)->pluck('industry_tags_id')->toArray();
         $IndustryBind_Names = '';
-        foreach($IndustryBind_Ids as $value){
-            if($IndustryBind_Names){
+        foreach($IndustryBind_Ids as $value)
+        {
+            if($IndustryBind_Names)
+            {
                 $IndustryBind_Names = 
-                $IndustryBind_Names.','.Industry_Tag::where('id',$value)->pluck('name')->first();
+                    $IndustryBind_Names.','.Industry_Tag::where('id',$value)->pluck('name')->first();
             }
             else{$IndustryBind_Names = Industry_Tag::where('id',$value)->pluck('name')->first();}
         }
@@ -93,22 +95,27 @@ class PrinterExporter extends BaseExport implements WithMapping, WithHeadings, F
 
         $Bind_Adapters = Bind::where('printers_id',$ids)->pluck('adapter')->toArray();
         $Arr = array();
-        foreach($Bind_Adapters as $values){
-            foreach($values as $value){
+        foreach($Bind_Adapters as $values)
+        {
+            foreach($values as $value)
+            {
                 array_push($Arr,$value);
             }
         }
         $AdapterArr = array();
-        foreach ($Arr as $values){
+        foreach ($Arr as $values)
+        {
             $a = 0;
-            foreach ($AdapterArr as $value){
+            foreach ($AdapterArr as $value)
+            {
                 if ($AdapterArr == $value){$a++;}
             }
             if ($a == 0){ $AdapterArr = $Arr;}
                 $a = 0;
         }
         $AdapterStr = '';
-        if (is_array($AdapterArr)){
+        if (is_array($AdapterArr))
+        {
             $AdapterStr = trim(implode(',',$AdapterArr), ',');
         }
 
@@ -116,8 +123,10 @@ class PrinterExporter extends BaseExport implements WithMapping, WithHeadings, F
 
         $ProjectBind_Ids = Project_Tag_Bind::where('printers_id',$ids)->pluck('project_tags_id')->toArray();
         $ProjectBind_Names = '';
-        foreach($ProjectBind_Ids as $value){
-            if($ProjectBind_Names){
+        foreach($ProjectBind_Ids as $value)
+        {
+            if($ProjectBind_Names)
+            {
                 $ProjectBind_Names = 
                 $ProjectBind_Names.','.Project_Tag::where('id',$value)->pluck('name')->first();
             }
@@ -125,22 +134,24 @@ class PrinterExporter extends BaseExport implements WithMapping, WithHeadings, F
         }
 
         return [
-            $row['id'],
-            $row['brands.name'],
-            $row['model'],
-            $row['type'],
-            $row['industry_tags_name'] = $IndustryBind_Names,
-            $row['principle_tags.name'],
-            $row['release_date'],
-            $row['onsale'],
-            $row['network'] = $network_statu,
-            $row['duplex'],
-            $row['pagesize'],
-            $row['adapter_status'],
-            $row['bind_adapters'] = $AdapterStr,
-            $row['project_tags_name'] = $ProjectBind_Names,
-            $row['created_at'],
-            $row['updated_at'],
+            [
+                $row['id'],
+                $row['brands.name'],
+                $row['model'],
+                $row['type'],
+                $row['industry_tags_name'] = $IndustryBind_Names,
+                $row['principle_tags.name'],
+                $row['release_date'],
+                $row['onsale'],
+                $row['network'] = $network_statu,
+                $row['duplex'],
+                $row['pagesize'],
+                $row['adapter_status'],
+                $row['bind_adapters'] = $AdapterStr,
+                $row['project_tags_name'] = $ProjectBind_Names,
+                $row['created_at'],
+                $row['updated_at'],
+            ]
         ];
     }
 }

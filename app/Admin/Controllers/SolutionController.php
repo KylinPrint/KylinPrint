@@ -46,14 +46,14 @@ class SolutionController extends AdminController
             });
         }
 
-        $grid->selector(function (Grid\Tools\Selector $selector) {
-            $selector->select('source', __('解决方案来源'), [
-                1 => 'HP',
-                2 => 'Canon',
-                3 => 'Kylin'
-            ]);
+        // $grid->selector(function (Grid\Tools\Selector $selector) {
+        //     $selector->select('source', __('解决方案来源'), [
+        //         1 => 'HP',
+        //         2 => 'Canon',
+        //         3 => 'Kylin'
+        //     ]);
             
-        }); 
+        // }); 
 
         $grid->column('id', __('ID'))->hide();
         $grid->column('name', __('Solution name'));

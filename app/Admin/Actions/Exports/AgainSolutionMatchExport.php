@@ -92,12 +92,9 @@ class AgainSolutionMatchExport implements FromCollection, WithHeadings
                 continue;
             }
 
-            preg_match('/\d+/',$curInput['型号'],$InputNum);
 
-            $result = substr($curInput['型号'],strripos($curInput['型号'],$InputNum[0]));
-
-            $curPrinterIdArr = Printer::where([
-                ['model','like','%'.$result.'%'],
+            $curPrinterId = Printer::where([
+                ['model','=',$curInput['型号']],
                 ['brands_id',$curBrandId],
             ])->pluck('id');
             
@@ -107,72 +104,73 @@ class AgainSolutionMatchExport implements FromCollection, WithHeadings
 
             //待优化，应该可以sql查询处理
             
-            foreach($curPrinterIdArr as $curPrinterId)
+            
+            
+            if($curPrinterId)
             {
-                if($curPrinterId)
+                $curBindAdapterId = Bind::where('printers_id',$curPrinterId)->pluck('id');
+
+                $curAdapter = $curInput['系统版本'].'_'.$curInput['系统架构'];
+
+                if(Empty($curBindAdapterId[0]))
                 {
-                    $curBindAdapterId = Bind::where('printers_id',$curPrinterId)->pluck('id');
-
-                    $curAdapter = $curInput['系统版本'].'_'.$curInput['系统架构'];
-
-                    if(Empty($curBindAdapterId[0]))
+                    if(Printer::where('id',$curPrinterId)->pluck('onsale')->first() == 0 && $curMatchArr[$i]['解决方案名'] == '暂无适配方案')
                     {
-                        if(Printer::where('id',$curPrinterId)->pluck('onsale')->first() == 0 && $curMatchArr[$i]['解决方案名'] == '暂无适配方案')
-                        {
-                            $curMatchArr[$i]['解决方案名'] = '已停产型号，暂无适配方案';
-                        }
-                        elseif(Printer::where('id',$curPrinterId)->pluck('onsale')->first() == 1)
-                        {
-                            $curPrinterReDate = Printer::where('id',$curPrinterId)->pluck('release_date')->first();
-                            $curLocalDate = time();
-                            if(($curLocalDate-strtotime($curPrinterReDate)>=157680000000))
-                            {
-                                $curMatchArr[$i]['解决方案名'] = '发售5年以上机型，暂无适配方案';
-                            }
-                        }
+                        $curMatchArr[$i]['解决方案名'] = '已停产型号，暂无适配方案';
                     }
-
-                    foreach($curBindAdapterId as $AdapterArr)
+                    elseif(Printer::where('id',$curPrinterId)->pluck('onsale')->first() == 1)
                     {
-                        $curBindAdapter = Bind::where('id',$AdapterArr)->pluck('adapter')->first();
-                        $curBindSolutionId = Bind::where('id',$AdapterArr)->pluck('solutions_id')->first();
-                        $curHead = 
-                        '已匹配到 ‘'.Brand::where('id',Printer::where('id',$curPrinterId)
-                        ->pluck('brands_id')
-                        ->first())
-                        ->pluck('name')
-                        ->first().'’ ‘'.Printer::where('id',$curPrinterId)
-                        ->pluck('model')
-                        ->first().'’ 型号解决方案：';
-
-                        foreach($curBindAdapter as $value)
+                        $curPrinterReDate = Printer::where('id',$curPrinterId)->pluck('release_date')->first();
+                        $curLocalDate = time();
+                        if(($curLocalDate-strtotime($curPrinterReDate)>=157680000000))
                         {
-                            if($curAdapter == $value)
-                            {
-                                if(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 1){$curMatchArr[$i]['适配状态'] = '已验证';}
-                                elseif(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 2){$curMatchArr[$i]['适配状态'] = '待验证';}
-                                if($curMatchArr[$i]['解决方案名'] == '暂无适配方案')
-                                {
-                                    $curMatchArr[$i]['解决方案名'] = $curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();
-                                    $curMatchArr[$i]['解决方案详情'] = Solution::where('id',$curBindSolutionId)->pluck('detail')->first();
-                                }
-                                else
-                                {
-                                    $curMatchArr[$i]['解决方案名'] = $curMatchArr[$i]['解决方案名'].'；'.$curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();
-                                    $curMatchArr[$i]['解决方案详情'] = $curMatchArr[$i]['解决方案详情'].'；'.Solution::where('id',$curBindSolutionId)->pluck('detail')->first();
-                                }
-                            }
+                            $curMatchArr[$i]['解决方案名'] = '发售5年以上机型，暂无适配方案';
                         }
-                        
                     }
                 }
 
-                //TODO  考虑将解决方案详情加入一个哈希表，遍历是否有相同内容
-                else
+
+                foreach($curBindAdapterId as $AdapterArr)
                 {
-                    $curMatchArr[$i]['解决方案名'] = '暂无该型号记录,或核实型号后重新上传';
+                    $curBindAdapter = Bind::where('id',$AdapterArr)->pluck('adapter')->first();
+                    $curBindSolutionId = Bind::where('id',$AdapterArr)->pluck('solutions_id')->first();
+                    $curHead = 
+                    '已匹配到 ‘'.Brand::where('id',Printer::where('id',$curPrinterId)
+                    ->pluck('brands_id')
+                    ->first())
+                    ->pluck('name')
+                    ->first().'’ ‘'.Printer::where('id',$curPrinterId)
+                    ->pluck('model')
+                    ->first().'’ 型号解决方案：';
+
+                    foreach($curBindAdapter as $value)
+                    {
+                        if($curAdapter == $value)
+                        {
+                            if(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 1){$curMatchArr[$i]['适配状态'] = '已验证';}
+                            elseif(Bind::where('id',$AdapterArr)->pluck('checked')->first() == 2){$curMatchArr[$i]['适配状态'] = '待验证';}
+                            if($curMatchArr[$i]['解决方案名'] == '暂无适配方案')
+                            {
+                                $curMatchArr[$i]['解决方案名'] = $curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();
+                                $curMatchArr[$i]['解决方案详情'] = Solution::where('id',$curBindSolutionId)->pluck('detail')->first();
+                            }
+                            else
+                            {
+                                $curMatchArr[$i]['解决方案名'] = $curMatchArr[$i]['解决方案名'].'；'.$curHead.Solution::where('id',$curBindSolutionId)->pluck('name')->first();
+                                $curMatchArr[$i]['解决方案详情'] = $curMatchArr[$i]['解决方案详情'].'；'.Solution::where('id',$curBindSolutionId)->pluck('detail')->first();
+                            }
+                        }
+                    }
+                    
                 }
             }
+
+            //TODO  考虑将解决方案详情加入一个哈希表，遍历是否有相同内容
+            else
+            {
+                $curMatchArr[$i]['解决方案名'] = '暂无该型号记录,或核实型号后重新上传';
+            }
+            
             ++$i;
         }
         return $curMatchArr;
