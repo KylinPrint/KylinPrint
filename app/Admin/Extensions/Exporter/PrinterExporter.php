@@ -75,8 +75,11 @@ class PrinterExporter extends BaseExport implements WithMapping, WithHeadings, F
         
         $PrinterRow = new Fluent($row);
         $ids = $PrinterRow->id;
+
+        $curBindArr = Bind::where('printers_id',$ids)->get()->toArray();
         
         $IndustryBind_Ids = Industry_Tag_Bind::where('printers_id',$ids)->pluck('industry_tags_id')->toArray();
+
         $IndustryBind_Names = '';
         foreach($IndustryBind_Ids as $value)
         {

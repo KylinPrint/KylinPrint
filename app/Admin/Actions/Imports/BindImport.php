@@ -41,9 +41,8 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
             {
                 $curBindSId = Bind::where('id',$value1)->pluck('solutions_id')->first();
                 if($curBindSId == $curSolutionId)
-                {   
+                {
                     $curAdapter = Bind::where('id',$value1)->pluck('adapter')->first();
-                    
                     return null;
                 }
             }
@@ -51,11 +50,11 @@ class BindImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkRe
         
 
         return new Bind([
-                'printers_id' => $curPrinterId,   
+                'printers_id' => $curPrinterId,
                 'solutions_id' => $curSolutionId,
                 'adapter' => $curBindAdapter,
-                'checked' => $row['适配状态'] == '通过'?1:2,
-                'comments' => $row['备注'],
+                'checked' => 2,//$row['适配状态'] == '通过'?1:2,
+                //'comments' => $row['备注'],
         ]);
 
     }

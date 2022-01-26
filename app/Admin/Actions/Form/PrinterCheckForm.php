@@ -35,9 +35,8 @@ class PrinterCheckForm extends Form
             $disk = Storage::disk('local');
             $disk -> delete('public'.$input['file']);
 
-
-            $storeFile = substr(strrchr($input['file'],'/'),1);
-            $storeFileName = 'match/'.substr($storeFile,0,strrpos($storeFile,'.')).'_初步验证结果_'.date('Y-m-d_H:i:s').'.xlsx';
+            $storeFile = strchr(basename($input['file']),'.',1);
+            $storeFileName = 'match/'.$storeFile.'_初步验证结果_'.date('Y-m-d_H:i:s').'.xlsx';
             
             (new PrinterCheckExport($array,$file))->store($storeFileName,'admin');
 
@@ -46,7 +45,6 @@ class PrinterCheckForm extends Form
             return $this->response()->success('数据导出成功')->refresh();
 
         } catch (\Exception $e) {
-    
             return $this->response()->error($e->getMessage());
         }
     }

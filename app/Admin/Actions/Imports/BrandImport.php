@@ -31,11 +31,12 @@ class BrandImport implements ToModel, WithStartRow, WithBatchInserts, WithChunkR
         }
 
         $curManufactorID = Manufactor::where('name',$row['厂商名称'])->pluck('id')->first();
+        
 
         return new Brand([
             'name' => $row['品牌'],
             'name_en' => $row['manufacter(厂商英文名)'],
-            'manufactors_id' => $curManufactorID,        
+            // 'manufactors_id' => $curManufactorID?$curManufactorID:'',
         ]);
 
     }

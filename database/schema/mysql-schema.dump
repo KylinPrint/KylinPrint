@@ -330,7 +330,6 @@ CREATE TABLE `printers` (
   `network` smallint(6) DEFAULT NULL,
   `duplex` enum('single','manual','duplex') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pagesize` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `mainstream` smallint(6) NOT NULL,
   `language` varchar(1023) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `adapter_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,

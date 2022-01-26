@@ -27,110 +27,107 @@ class PrinterImport implements ToModel, WithStartRow, WithBatchInserts, WithChun
     public function model(array $row)
     {
         
-        $curPrinterModel = Printer::where('model','=', $row['model(英文型号)'])->pluck('id');
+        $curPrinterModel = Printer::where('model','=', $row['model(英文型号)'])->pluck('brands_id')->first();
 
         //数据重复逻辑,需连同品牌
-        if ($curPrinterModel) {
-            foreach($curPrinterModel as $value)
-            {
-                $row['manufacter(厂商英文名)'] == Brand::where('id',$value)->pluck('name')->first();
-                return null;
-            }
+        if ($curPrinterModel) {  
+            $row['manufacter(厂商英文名)'] == Brand::where('id',$curPrinterModel)->pluck('name_en')->first();
+            return null;     
         }
 
         $curBrandId = Brand::where('name_en',$row['manufacter(厂商英文名)'])->pluck('id')->first();
         
         
-        switch ($row['是否彩打']){
-            case '彩色':
-                $curType = 'color';
-                break;
-            case '黑白':
-                $curType = 'mono';
-                break;
-            default:
-                $curType = null;
-        }
+        // switch ($row['是否彩打']){
+        //     case '彩色':
+        //         $curType = 'color';
+        //         break;
+        //     case '黑白':
+        //         $curType = 'mono';
+        //         break;
+        //     default:
+        //         $curType = null;
+        // }
     
 
-        if($row['分类2']){
-            switch ($row['分类2']){
-                case '热敏打印机':
-                    $curPrinciple = '1';
-                    break;
-                case '喷墨打印机':
-                    $curPrinciple = '2';
-                    break;
-                case '激光打印机':
-                    $curPrinciple = '3';
-                    break;
-                case '针式打印机':
-                    $curPrinciple = '4';
-                    break;
-                default:
-                    $curPrinciple = '5'; 
-            }
-        }
+        // if($row['分类2']){
+        //     switch ($row['分类2']){
+        //         case '热敏打印机':
+        //             $curPrinciple = '1';
+        //             break;
+        //         case '喷墨打印机':
+        //             $curPrinciple = '2';
+        //             break;
+        //         case '激光打印机':
+        //             $curPrinciple = '3';
+        //             break;
+        //         case '针式打印机':
+        //             $curPrinciple = '4';
+        //             break;
+        //         default:
+        //             $curPrinciple = '5'; 
+        //     }
+        // }
 
         
-        if ($row['上市日期'] == '暂无数据' || !isset($row['上市日期'])){$date = null;}
-        else {$date = date('Y-m-d', ($row ['上市日期'] - 25569) * 24 * 3600);}
+        // if ($row['上市日期'] == '暂无数据' || !isset($row['上市日期'])){$date = null;}
+        // else {$date = date('Y-m-d', ($row ['上市日期'] - 25569) * 24 * 3600);}
 
-        if($row['是否停产']){
-            switch ($row['是否停产']){
-                case '停产':
-                    $curOnsale = '0';
-                    break;
-                case '在售';
-                    $curOnsale = '1';
-                    break;
-                default:
-                    $curOnsale = '2';
-            }
-        }
+        // if($row['是否停产']){
+        //     switch ($row['是否停产']){
+        //         case '停产':
+        //             $curOnsale = '0';
+        //             break;
+        //         case '在售';
+        //             $curOnsale = '1';
+        //             break;
+        //         default:
+        //             $curOnsale = '2';
+        //     }
+        // }
 
-        if($row['是否停产'] == '停产'){$curOnsale = 0;}
-        elseif($row['是否停产'] == '在售'){$curOnsale = 1;}
-        else $curOnsale = 2;
+        // if($row['是否停产'] == '停产'){$curOnsale = 0;}
+        // elseif($row['是否停产'] == '在售'){$curOnsale = 1;}
+        // else $curOnsale = 2;
 
-        if($row['网络打印'] == 0 || !isset($row['网络打印'])){$curNetwork = 2;}
-        elseif ($row['网络打印'] = '支持') {$curNetwork = 1;}
-        elseif ($row['网络打印'] = '不支持') {$curNetwork = 0;} 
+        // if($row['网络打印'] == 0 || !isset($row['网络打印'])){$curNetwork = 2;}
+        // elseif ($row['网络打印'] = '支持') {$curNetwork = 1;}
+        // elseif ($row['网络打印'] = '不支持') {$curNetwork = 0;} 
 
-        if($row['双面打印'] == '双面'){$curDuplex = 'duplex';}
-        else $curDuplex = 'single';
+        // if($row['双面打印'] == '双面'){$curDuplex = 'duplex';}
+        // else $curDuplex = 'single';
 
-        if($row['最大支持幅面'] == 0 || !isset($row['双面打印'])){$curPagesize = '暂无数据';}
-        else $curPagesize = $row['最大支持幅面'];
+        // if($row['最大支持幅面'] == 0 || !isset($row['双面打印'])){$curPagesize = '暂无数据';}
+        // else $curPagesize = $row['最大支持幅面'];
 
         if($row['是否主流在售'] == '主流在售') {$curMainstream = 1;}
         else {$curMainstream = 0;}
 
-        $curAdapterStatu = 0;
-        if($row['适配状态'] == '通过')
-        {
-            $curAdapterStatu = 1;
-            if(isEmpty($row['测试方式']))
-            {
-                $curAdapterStatu = 2;
-            }
-        }
+        // $curAdapterStatu = 0;
+        // if($row['适配状态'] == '通过')
+        // {
+        //     $curAdapterStatu = 1;
+        //     if(isEmpty($row['测试方式']))
+        //     {
+        //         $curAdapterStatu = 2;
+        //     }
+        // }
 
         
 
         return new Printer([
                 'brands_id' => $curBrandId,
                 'model' => $row['model(英文型号)'],
-                'type' => $curType,
-                'principle_tags_id' => $curPrinciple, 
-                'release_date' => $date,
-                'onsale' => $curOnsale,
-                'network' => $curNetwork,
-                'duplex' => $curDuplex,
-                'pagesize' => $curPagesize,
+                // 'type' => $curType,
+                // 'principle_tags_id' => $curPrinciple,
+                // 'release_date' => $date,
+                // 'onsale' => $curOnsale,
+                // 'network' => $curNetwork,
+                // 'duplex' => $curDuplex,
+                // 'pagesize' => $curPagesize,
                 'mainstream' => $curMainstream,
-                'language' => $row['打印语言'],
-                'adapter_status' => $curAdapterStatu,
+                // 'language' => $row['打印语言'],
+                // 'adapter_status' => $curAdapterStatu,
             ]);
 
     }

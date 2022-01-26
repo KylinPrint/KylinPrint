@@ -24,13 +24,14 @@ use App\Models\Principle_Tag;
 use App\Models\Solution;
 use Dcat\Admin\Http\Auth\Permission;
 use App\Admin\Extensions\Exporter\PrinterExporter;
+use App\Admin\Extensions\Exporter\NewPrinterExporter;
 use App\Admin\Metrics\TestLine;
 use App\Models\Industry_Tag_Bind;
 use App\Models\Project_Tag_Bind;
 use App\Models\Project_Tag as Project;
 use App\Admin\Metrics\TestPie;
 
-
+use function PHPUnit\Framework\isEmpty;
 
 class PrinterController extends AdminController
 {
@@ -41,17 +42,17 @@ class PrinterController extends AdminController
      */
     protected $title = '打印机';
 
-    public function index(Content $content)
-    {
-        return $content
-            ->header('打印机')
-            ->description('打印机信息展示')
-            ->body(function ($row) {
-                $row->column(4, new TestPie());
-                $row->column(4, new TestLine());
-            })
-            ->body($this->grid());
-    }
+    // public function index(Content $content)
+    // {
+    //     return $content
+    //         ->header('打印机')
+    //         ->description('打印机信息展示')
+    //         ->body(function ($row) {
+    //             $row->column(4, new TestPie());
+    //             $row->column(4, new TestLine());
+    //         })
+    //         ->body($this->grid());
+    // }
 
 
     /**
@@ -71,7 +72,7 @@ class PrinterController extends AdminController
             $grid->disableCreateButton();
         }
         
-        $grid->export(new PrinterExporter());
+        $grid->export(new NewPrinterExporter());
 
         $grid->quickSearch('model','brands.name','brands.name_en');    //快速搜索
 
@@ -326,9 +327,9 @@ class PrinterController extends AdminController
             $grid->column('solutions.name', __('Solution name'));
             $grid->column('solutions.comment', __('Solution comment'));
             $grid->checked(__('Checked'))->display(function ($checked) {
-                if     ($checked == '0') { return '未验证'; }
-                elseif ($checked == '1') { return '已验证'; }
+                if ($checked == '1') { return '已验证'; }
                 elseif ($checked == '2') { return '待验证'; }
+                elseif ($checked == '3') { return '已适配'; }
                 else                     { return ''; };
             });
             $grid->column('adapter',__('适配平台'))->label();
@@ -413,7 +414,9 @@ class PrinterController extends AdminController
                     'V10SP1_Loongarch' => 'V10SP1_Loongarch'
                 ]);
                 $form->select('checked')->options([
-                    0 => '未验证',1 => '已验证',2 => '待验证',
+                    1 => '已验证',
+                    2 => '待验证',
+                    3 => '已适配',
                 ]);        
             })->useTable();
               
@@ -423,19 +426,13 @@ class PrinterController extends AdminController
             
             $form->saving(function (Form $form) {
                 
-                $id = request()->route()->parameters()['printer'];
+                
+                $curModel = ($form->input()['binds'])?($form->input()['binds']):null;
                 //获取当前实例id
-                $a = Bind::where('printers_id', '=', $id)->select('id','checked')->get();
-                $count = count($a);
+                
+                $count = Empty($curModel)?count($curModel):0;
                 if($count == 0){$form->adapter_status = 0;}
-                else {
-                    $b = 0;
-                    foreach ($a as $value){
-                        if ($value['checked'] == 1) {++$b;}
-                    }
-                    if ($b == 0) {$form->adapter_status = 1;}
-                    else $form->adapter_status = 2;
-                };
+                else {$form->adapter_status = 1;};
             }); 
             
 

@@ -28,8 +28,8 @@ class PrinterForm extends Form
             // Excel::import(new BrandImport(),$file);
             // Excel::import(new PrinterImport(),$file);
             // Excel::import(new SolutionImport(),$file);
-            // Excel::import(new BindImport(),$file);
-            Excel::import(new BindUpdate(),$file);
+            Excel::import(new BindImport(),$file);
+            // Excel::import(new BindUpdate(),$file);
 
             $disk = Storage::disk('public');
             $disk -> delete($input['file']);
